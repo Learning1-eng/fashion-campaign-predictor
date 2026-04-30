@@ -278,7 +278,7 @@ VIP_PERSONAS = [
     ("Private Client",          0.10, 1.5,  1.2),
     ("Digital Native",          0.18, 0.6,  1.3),
     ("Heritage Loyalist",       0.12, 1.2,  0.9),
-)
+]
 
 
 def run_simulation(
