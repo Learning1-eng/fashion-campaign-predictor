@@ -448,8 +448,7 @@ def make_chart(df: pd.DataFrame, city_summary: pd.DataFrame, campaign_label: str
     )
     ax1.yaxis.grid(True, color=grid_c, linewidth=0.5, zorder=1)
     ax1.set_axisbelow(True)
-    ax1.set_title("Buy Rate by City", color=cream, fontsize=8, fontweight="normal",
-                  letter_spacing=5, pad=12)
+    ax1.set_title("Buy Rate by City", color=cream, fontsize=8, fontweight="normal", pad=12)
     ax1.set_ylabel("%", color=text_c, fontsize=7)
     ax1.set_xlabel("", color=text_c)
     for bar in bars:
