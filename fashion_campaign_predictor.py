@@ -34,7 +34,16 @@ st.markdown("<style>" +
     "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');" +
     "html,body,[class*='css']{font-family:Montserrat,sans-serif!important;background:#fff;color:#111;}" +
     ".stApp{background:#FAFAF8;}" +
+    "[data-baseweb='tag']{background:#fff!important;color:#111!important;border:1px solid #333!important;}" +
+    "[data-baseweb='tag'] span{color:#111!important;font-family:Montserrat,sans-serif!important;}" +
+    ".stSlider div[class*='thumb']{background:#C8D400!important;border-color:#C8D400!important;}" +
+    ".stSlider div[class*='track--active']{background:#C8D400!important;}" +
+    "section[data-testid='stSidebar'] input[type='number']{color:#fff!important;background:#1A1A1A!important;}" +
+    ".stSlider [data-baseweb='slider'] [role='slider']{background:#C8D400!important;border-color:#C8D400!important;}" +
+    ".stSlider [data-baseweb='slider'] div[class*='track'] div{background:#C8D400!important;}" +
     "section[data-testid='stSidebar']{background:#111!important;}" +
+    "section[data-testid='stSidebar'] input{color:#fff!important;background:#1A1A1A!important;border-color:#444!important;}" +
+    "section[data-testid='stSidebar'] input::placeholder{color:#666!important;}" +
     "section[data-testid='stSidebar'] *{color:#fff!important;font-family:Montserrat,sans-serif!important;}" +
     "section[data-testid='stSidebar'] label{font-size:0.55rem!important;letter-spacing:0.15em!important;text-transform:uppercase!important;color:#888!important;font-weight:600!important;}" +
     ".stButton>button{background:transparent!important;color:#111!important;border:2px solid #111!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.62rem!important;font-weight:600!important;letter-spacing:0.12em!important;text-transform:uppercase!important;padding:0.8rem 2rem!important;width:100%!important;transition:all 0.25s!important;}" +
@@ -46,6 +55,11 @@ st.markdown("<style>" +
     ".stDownloadButton>button{background:transparent!important;color:#111!important;border:1px solid #111!important;border-radius:24px!important;font-size:0.55rem!important;letter-spacing:0.12em!important;text-transform:uppercase!important;font-weight:600!important;}" +
     ".stDownloadButton>button:hover{background:#111!important;color:#fff!important;}" +
     ".stDataFrame,.stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.75rem!important;}" +
+    ".stDataFrame th{color:#111!important;font-weight:600!important;background:#F5F5F3!important;}" +
+    ".stDataFrame th{color:#111!important;font-weight:600!important;}" +
+    "label{color:#111!important;}" +
+    "[data-baseweb='tag']{background:#fff!important;color:#111!important;border:1px solid #111!important;}" +
+    "[data-baseweb='tag'] span{color:#111!important;}" +
     "#MainMenu,footer,header{visibility:hidden;}" +
     "</style>", unsafe_allow_html=True)
 
@@ -131,6 +145,7 @@ def make_charts(df, city_summary):
         margin=dict(l=20,r=20,t=40,b=20), hoverlabel=dict(bgcolor="#111",font_color="#fff",font_family="Montserrat"))
 
     fig = make_subplots(rows=1, cols=3,
+        column_widths=[0.30, 0.40, 0.30],
         subplot_titles=["Buy rate by city", "Purchase intent distribution", "Revenue by city (kEUR)"])
 
     fig.add_trace(go.Bar(
@@ -154,18 +169,31 @@ def make_charts(df, city_summary):
         hovertemplate="%{y}: EUR%{x:,.0f}k<extra></extra>",
         showlegend=False), row=1, col=3)
 
-    fig.update_layout(**layout_base, height=380,
+    fig.update_layout(**layout_base, height=260,
         legend=dict(bgcolor="#FAFAF8", bordercolor="#E8E8E4", font=dict(family="Montserrat")))
     fig.update_xaxes(showgrid=True, gridcolor="#E8E8E4", linecolor="#E8E8E4", tickfont=dict(size=9))
     fig.update_yaxes(showgrid=True, gridcolor="#E8E8E4", linecolor="#E8E8E4", tickfont=dict(size=9))
     for ann in fig.layout.annotations:
-        ann.font.size = 10
+        ann.font.size = 9
         ann.font.family = "Montserrat, sans-serif"
         ann.font.color = "#111111"
+        ann.xanchor = "center"
     return fig
 
 with st.sidebar:
-    st.markdown('<div style="text-align:center;padding:1.5rem 0 0.8rem 0;"><img src="https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png" style="width:80px;height:80px;border-radius:50%;object-fit:cover;"></div><hr style="border-color:#333;margin:0.5rem 0 1.2rem 0;">', unsafe_allow_html=True)
+    st.markdown('<div style="text-align:center;padding:1.2rem 0 0.6rem 0;"><img src="https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png" style="width:100px;height:100px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;"></div><hr style="border-color:#333;margin:0.5rem 0 1.2rem 0;">', unsafe_allow_html=True)
+    uploaded_logo = st.file_uploader("Upload client brand logo", type=["png","jpg","jpeg","svg"], label_visibility="collapsed")
+    if uploaded_logo:
+        import base64
+        logo_data = base64.b64encode(uploaded_logo.read()).decode()
+        ext = uploaded_logo.name.split(".")[-1]
+        st.markdown(f'<div style="text-align:center;padding:0.5rem 0;"><img src="data:image/{ext};base64,{logo_data}" style="max-width:120px;max-height:60px;object-fit:contain;"></div>', unsafe_allow_html=True)
+    st.markdown("<div style='font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:#666;margin-bottom:0.3rem;'>Client brand logo</div>", unsafe_allow_html=True)
+    uploaded_logo = st.file_uploader("logo", type=["png","jpg","jpeg"], label_visibility="collapsed")
+    if uploaded_logo:
+        import base64 as b64
+        logo_data = b64.b64encode(uploaded_logo.read()).decode()
+        st.markdown(f'<div style="text-align:center;padding:0.3rem 0;"><img src="data:image/png;base64,{logo_data}" style="max-width:120px;max-height:50px;object-fit:contain;"></div>', unsafe_allow_html=True)
     campaign_type = st.selectbox("Campaign Type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
     n_vics = st.slider("Vic Pool Size",min_value=500,max_value=50000,value=5000,step=500)
     cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5])
@@ -225,7 +253,14 @@ else:
     st.markdown("<br>",unsafe_allow_html=True)
     csv = io.StringIO()
     df.to_csv(csv,index=False)
-    st.download_button("Export VIC dataset (CSV)",data=csv.getvalue(),file_name=f"campaign_{campaign_type}_{n_vics}vics.csv",mime="text/csv")
+    exc_buf = io.BytesIO()
+    df.to_excel(exc_buf, index=False, engine='openpyxl')
+    exc_buf.seek(0)
+    col_csv, col_xl = st.columns(2)
+    with col_csv:
+        st.download_button("Export CSV",data=csv.getvalue(),file_name=f"campaign_{campaign_type}_{n_vics}vics.csv",mime="text/csv")
+    with col_xl:
+        st.download_button("Export Excel",data=exc_buf.read(),file_name=f"campaign_{campaign_type}_{n_vics}vics.xlsx",mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     st.markdown("<hr style='border-color:#E8E8E4;margin:1.5rem 0;'>",unsafe_allow_html=True)
     roi_read = "strong positive" if summary["roi"]>50 else "moderate" if summary["roi"]>0 else "negative"
     top_city = summary["city_summary"].iloc[0]["City"]
