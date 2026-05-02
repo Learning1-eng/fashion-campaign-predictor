@@ -16,9 +16,9 @@ if "authenticated" not in st.session_state:
 
 if not st.session_state.authenticated:
     st.markdown("<style>" +
-    "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');" +
-    "html,body,[class*='css']{font-family:Montserrat,sans-serif!important;background:#FAFAF8;color:#111;}" +
-    ".stApp{background:#FAFAF8;}" +
+    "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap');" +
+    "html,body,[class*='css']{font-family:Montserrat,sans-serif!important;background:#FFFFFF;color:#000;}" +
+    ".stApp{background:#FFFFFF;}" +
     
     "section[data-testid='stSidebar']{background:#111111!important;}" +
     "section[data-testid='stSidebar'] > div{background:#111111!important;}" +
@@ -34,34 +34,45 @@ if not st.session_state.authenticated:
     "section[data-testid='stSidebar'] [data-baseweb='select'] *{background:#fff!important;color:#111!important;}" +
     "section[data-testid='stSidebar'] [data-baseweb='select'] svg{fill:#111!important;}" +
     
-    "[data-baseweb='tag']{background:#fff!important;border:1.5px solid #555!important;border-radius:20px!important;padding:2px 4px 2px 10px!important;margin:2px!important;}" +
-    "[data-baseweb='tag'] span{color:#111!important;font-size:0.72rem!important;font-weight:500!important;}" +
+    "[data-baseweb='multi-select']{background:#fff!important;border-color:#ccc!important;border-radius:6px!important;}" +
+    "[data-baseweb='tag']{background:#fff!important;border:1px solid #999!important;border-radius:4px!important;padding:2px 6px 2px 8px!important;margin:2px!important;}" +
+    "[data-baseweb='tag'] span{color:#111!important;font-size:0.9rem!important;font-weight:400!important;}" +
     "[data-baseweb='tag'] button{background:transparent!important;margin-left:2px!important;}" +
     "[data-baseweb='tag'] button svg{fill:#111!important;stroke:#111!important;width:11px!important;height:11px!important;}" +
     
-    "[data-testid='stSlider'] [role='slider']{background:#C8D400!important;border:2px solid #C8D400!important;width:22px!important;height:22px!important;top:-9px!important;}" +
-    "[data-testid='stSlider'] [data-testid='stSliderTrack'] > div:first-child{background:#C8D400!important;}" +
+    "[data-testid='stSlider'] [role='slider']{background:#C8D400!important;border:2px solid #C8D400!important;width:22px!important;height:22px!important;}" +
+    "[data-testid='stSlider'] > div > div > div > div{background:#C8D400!important;}" +
+    "[data-testid='stSlider'] div[class*='st-'][class*='bq']{background:#C8D400!important;}" +
+    "[data-testid='stSlider'] div[data-testid='stSliderTrackFill']{background:#C8D400!important;}" +
+    "div[class*='SliderTrack']{background:#C8D400!important;}" +
+    "div[class*='track']:not([data-testid]){background:#C8D400!important;}" +
     
-    ".stButton>button{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.62rem!important;font-weight:600!important;letter-spacing:0.1em!important;text-transform:uppercase!important;padding:0.85rem 1.5rem!important;width:100%!important;transition:all 0.25s!important;}" +
-    ".stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}" +
+    ".stButton>button{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:0!important;font-family:Montserrat,sans-serif!important;font-size:0.6rem!important;font-weight:700!important;letter-spacing:0.18em!important;text-transform:uppercase!important;padding:0.9rem 1.5rem!important;width:100%!important;transition:all 0.25s!important;}" +
+    ".stButton>button:hover{background:#C8D400!important;color:#111!important;}" +
     
-    ".metric-card{background:#fff;border:1px solid #E8E8E4;border-top:3px solid #111;padding:1.2rem 0.8rem;text-align:center;}" +
-    ".metric-value{font-family:Montserrat,sans-serif;font-size:1.8rem;font-weight:700;color:#111;line-height:1;margin-bottom:0.3rem;}" +
-    ".metric-label{font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#999;font-weight:600;}" +
-    ".metric-note{font-size:0.42rem;color:#bbb;margin-top:0.3rem;}" +
+    ".metric-card{background:#fff;border:1px solid #000;padding:1.4rem 0.8rem;text-align:center;}" +
+    ".metric-value{font-family:Montserrat,sans-serif;font-size:2rem;font-weight:800;color:#000;line-height:1;margin-bottom:0.3rem;}" +
+    ".metric-label{font-family:Montserrat,sans-serif;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:#000;font-weight:700;}" +
+    ".metric-note{font-family:Montserrat,sans-serif;font-size:0.45rem;color:#666;margin-top:0.3rem;}" +
     
-    ".section-label{font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#999;font-weight:600;margin-bottom:0.8rem;margin-top:1.5rem;border-bottom:1px solid #E8E8E4;padding-bottom:0.4rem;}" +
+    ".section-label{font-family:Montserrat,sans-serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#000;font-weight:700;margin-bottom:1rem;margin-top:2rem;border-bottom:1px solid #000;padding-bottom:0.5rem;}" +
     
-    ".stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.75rem!important;}" +
+    ".stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.875rem!important;}" +
     ".stDataFrame th{background:#F5F5F3!important;color:#111!important;font-weight:600!important;}" +
     
     ".stDownloadButton>button{background:transparent!important;color:#111!important;border:1px solid #111!important;border-radius:24px!important;font-size:0.55rem!important;letter-spacing:0.1em!important;text-transform:uppercase!important;font-weight:600!important;}" +
     ".stDownloadButton>button:hover{background:#111!important;color:#fff!important;}" +
     "#MainMenu,footer,header{visibility:hidden;}" +
+    ".main .block-container p{color:#111!important;}" +
+    ".main .block-container span:not([data-baseweb]){color:#111!important;}" +
+    ".main .block-container div:not([data-testid='stSidebar']){color:#111!important;}" +
+    ".main .block-container label{color:#111!important;}" +
+    ".main .block-container .stMarkdown{color:#111!important;}" +
+    "[data-testid='stAppViewContainer'] p,[data-testid='stAppViewContainer'] span,[data-testid='stAppViewContainer'] label,[data-testid='stAppViewContainer'] div{color:#000!important;}" +"[data-testid='stAppViewContainer'] .stMarkdown *{color:#000!important;}" +
     "</style>", unsafe_allow_html=True)
     _, col, _ = st.columns([1,1,1])
     with col:
-        st.markdown("<div style='text-align:center;padding:5rem 0 2rem'><img src='https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png' style='width:100px;height:100px;border-radius:50%;'><br><br><span style='font-size:0.55rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#999'>Private Access</span></div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center;padding:5rem 0 2rem'><img src='https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo%20copy.png' style='width:100px;height:100px;border-radius:50%;'><br><br><span style='font-size:0.55rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#999'>Private Access</span></div>", unsafe_allow_html=True)
         pwd = st.text_input("Access code", type="password", placeholder="Enter access code", label_visibility="collapsed")
         if st.button("Enter", use_container_width=True):
             if pwd == APP_PASSWORD:
@@ -71,12 +82,12 @@ if not st.session_state.authenticated:
                 st.error("Invalid access code.")
     st.stop()
 
-LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png"
+LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo%20copy.png"
 
 st.markdown("<style>" +
-    "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');" +
-    "html,body,[class*='css']{font-family:Montserrat,sans-serif!important;background:#FAFAF8;color:#111;}" +
-    ".stApp{background:#FAFAF8;}" +
+    "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap');" +
+    "html,body,[class*='css']{font-family:Montserrat,sans-serif!important;background:#FFFFFF;color:#000;}" +
+    ".stApp{background:#FFFFFF;}" +
     "section[data-testid='stSidebar']{background:#111111!important;}" +
     "section[data-testid='stSidebar'] *{color:#fff!important;font-family:Montserrat,sans-serif!important;}" +
     "section[data-testid='stSidebar'] label{font-size:0.55rem!important;letter-spacing:0.12em!important;text-transform:uppercase!important;color:#888!important;font-weight:600!important;}" +
@@ -89,14 +100,14 @@ st.markdown("<style>" +
     "[data-testid='stSlider'] [role='slider']{background:#C8D400!important;border-color:#C8D400!important;width:20px!important;height:20px!important;}" +"[data-testid='stSlider'] div[class*='track'] div{background:#C8D400!important;}" +"[data-testid='stSlider'] div[class*='track']{background:#444!important;}" +
     "section[data-testid='stSidebar'] .stNumberInput button{background:#C8D400!important;color:#111!important;border-color:#C8D400!important;font-weight:700!important;}" +
     ".stButton>button{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.62rem!important;font-weight:600!important;letter-spacing:0.1em!important;text-transform:uppercase!important;padding:0.9rem 2rem!important;width:100%!important;transition:all 0.25s!important;outline:none!important;}" +
-    ".stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}" +
-    ".metric-card{background:#fff;border:1px solid #E8E8E4;border-top:3px solid #111;padding:1.2rem 0.8rem;text-align:center;}" +
-    ".metric-value{font-family:Montserrat,sans-serif;font-size:1.8rem;font-weight:700;color:#111;line-height:1;margin-bottom:0.3rem;}" +
-    ".metric-label{font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#999;font-weight:600;}" +
+    ".stButton>button:hover{background:#C8D400!important;color:#111!important;}" +
+    ".metric-card{background:#fff;border:1px solid #000;padding:1.4rem 0.8rem;text-align:center;}" +
+    ".metric-value{font-family:Montserrat,sans-serif;font-size:2rem;font-weight:800;color:#000;line-height:1;margin-bottom:0.3rem;}" +
+    ".metric-label{font-family:Montserrat,sans-serif;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:#000;font-weight:700;}" +
     ".metric-note{font-size:0.42rem;color:#bbb;margin-top:0.3rem;letter-spacing:0.03em;}" +
-    ".section-label{font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#999;font-weight:600;margin-bottom:0.8rem;margin-top:1.5rem;border-bottom:1px solid #E8E8E4;padding-bottom:0.4rem;}" +
+    ".section-label{font-family:Montserrat,sans-serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:#000;font-weight:700;margin-bottom:1rem;margin-top:2rem;border-bottom:1px solid #000;padding-bottom:0.5rem;}" +
     ".stDataFrame{border:1px solid #E8E8E4;}" +
-    ".stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.75rem!important;}" +
+    ".stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.875rem!important;}" +
     ".stDataFrame th{background:#F5F5F3!important;color:#111!important;font-weight:600!important;}" +
     ".stDownloadButton>button{background:transparent!important;color:#111!important;border:1px solid #111!important;border-radius:24px!important;font-size:0.55rem!important;letter-spacing:0.1em!important;text-transform:uppercase!important;font-weight:600!important;}" +
     ".stDownloadButton>button:hover{background:#111!important;color:#fff!important;}" +
@@ -206,10 +217,9 @@ def make_charts(df, city_summary):
     return fig
 
 with st.sidebar:
-    LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png"
+    LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo%20copy.png"
     st.markdown(f'<div style="text-align:center;padding:1rem 0 0.5rem;"><img src="{LOGO_URL}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;"></div><hr style="border-color:#333;margin:0.3rem 0 0.8rem;">', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:#666;margin-bottom:0.3rem;">Client brand logo</div>', unsafe_allow_html=True)
-    uploaded_logo = st.file_uploader("logo", type=["png","jpg","jpeg"], label_visibility="collapsed")
+    uploaded_logo = st.file_uploader("+ Upload client logo", type=["png","jpg","jpeg"])
     if uploaded_logo:
         import base64 as b64lib
         logo_data = b64lib.b64encode(uploaded_logo.read()).decode()
@@ -224,14 +234,14 @@ with st.sidebar:
     run = st.button("Run simulation")
     st.markdown("<div style='margin-top:1.5rem;text-align:center;'><div style='font-size:0.65rem;font-weight:600;color:#555;letter-spacing:0.1em;text-transform:uppercase;'>Dress for Good</div></div>", unsafe_allow_html=True)
 
-st.markdown("<div style='border-bottom:2px solid #111;padding-bottom:1rem;margin-bottom:2rem;'>" +
-    "<div style='font-size:0.5rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:0.4rem;'>Dress for Good — AI Luxury Studio</div>" +
-    "<div style='font-family:Montserrat;font-size:2.4rem;font-weight:700;color:#111;line-height:1.1;'>Fashion campaign predictor</div>" +
-    "<div style='font-size:0.58rem;font-weight:400;letter-spacing:0.08em;color:#999;margin-top:0.4rem;'>Multi-agent simulation — Luxury marketing intelligence</div>" +
+st.markdown("<div style='border-bottom:1px solid #000;padding-bottom:1.2rem;margin-bottom:2.5rem;'>" +
+    "<div style='font-family:Montserrat;font-size:0.6rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#000;margin-bottom:0.8rem;'>Dress for Good — AI Luxury Studio</div>" +
+    "<div style='font-family:Montserrat;font-size:3rem;font-weight:800;color:#000;line-height:1;letter-spacing:-0.02em;'>Fashion campaign predictor</div>" +
+    "<div style='font-family:Montserrat;font-size:0.75rem;font-weight:400;color:#000;margin-top:0.6rem;letter-spacing:0.02em;'>Multi-agent simulation — Luxury marketing intelligence</div>" +
     "</div>", unsafe_allow_html=True)
 
 if not run:
-    st.markdown("<div style='text-align:center;padding:6rem 2rem;color:#CCC;font-size:0.85rem;font-weight:300;letter-spacing:0.05em;'>Configure parameters and run the simulation</div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center;padding:6rem 2rem;'><span style='font-family:Montserrat;font-size:1rem;font-weight:500;color:#000;letter-spacing:0.02em;'>Configure parameters and run the simulation</span></div>", unsafe_allow_html=True)
 else:
     with st.spinner("Running simulation..."):
         df = run_simulation(campaign_type, n_vics, cities, budget)
@@ -291,7 +301,7 @@ else:
                f"projects a {roi_read} ROI of {summary['roi']:+.0f}% on a EUR{budget:,.0f} investment. "
                f"Conversion: {summary['buy_rate']}%. Top market: {top_city}. "
                f"Dominant persona: {top_persona}. Projected revenue: EUR{summary['total_revenue']:,.0f}.")
-    st.markdown(f"<div style='font-size:0.88rem;font-weight:300;color:#111;line-height:1.9;padding:1rem 0 1rem 1.2rem;border-left:3px solid #C8D400;'>{readout}</div>",unsafe_allow_html=True)
+    st.markdown(f"<div style='font-size:1rem;font-weight:400;color:#111;line-height:1.8;padding:1.2rem 0 1.2rem 1.5rem;border-left:3px solid #C8D400;'>{readout}</div>",unsafe_allow_html=True)
     st.markdown("<div style='margin-top:1.5rem;padding:1.2rem;background:#F5F5F3;font-size:0.55rem;color:#999;line-height:1.8;'>" +
         "<strong style='color:#111;letter-spacing:0.08em;text-transform:uppercase;font-size:0.5rem;'>* Methodology & Data Sources</strong><br><br>" +
         "<strong>Simulation:</strong> Beta-distribution probabilistic model. Intent sampled via Beta(alpha, beta) per agent, calibrated by campaign type, city, persona, and budget.<br>" +
