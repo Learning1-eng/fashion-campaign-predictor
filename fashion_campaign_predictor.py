@@ -16,12 +16,49 @@ if "authenticated" not in st.session_state:
 
 if not st.session_state.authenticated:
     st.markdown("<style>" +
-        "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');" +
-        "html,body,[class*='css']{background:#fff;color:#111;font-family:Montserrat,sans-serif;}" +
-        ".stApp{background:#fff;}#MainMenu,footer,header{visibility:hidden;}" +
-        ".stButton>button{background:transparent!important;color:#111!important;border:2px solid #111!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.65rem!important;font-weight:600!important;letter-spacing:0.1em!important;text-transform:uppercase!important;padding:0.75rem 2rem!important;transition:all 0.2s!important;}" +
-        ".stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}" +
-        "</style>", unsafe_allow_html=True)
+    "@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');" +
+    "html,body,[class*='css']{font-family:Montserrat,sans-serif!important;background:#FAFAF8;color:#111;}" +
+    ".stApp{background:#FAFAF8;}" +
+    
+    "section[data-testid='stSidebar']{background:#111111!important;}" +
+    "section[data-testid='stSidebar'] > div{background:#111111!important;}" +
+    "section[data-testid='stSidebar'] *{font-family:Montserrat,sans-serif!important;}" +
+    "section[data-testid='stSidebar'] label{font-size:0.55rem!important;letter-spacing:0.12em!important;text-transform:uppercase!important;color:#888!important;font-weight:600!important;}" +
+    
+    "section[data-testid='stSidebar'] input{color:#111!important;background:#fff!important;border-color:#ccc!important;border-radius:6px!important;}" +
+    "section[data-testid='stSidebar'] .stNumberInput input{color:#111!important;background:#fff!important;}" +
+    
+    "section[data-testid='stSidebar'] .stNumberInput button{background:#C8D400!important;color:#111!important;border-color:#C8D400!important;width:28px!important;height:28px!important;font-size:1rem!important;}" +
+    
+    "section[data-testid='stSidebar'] [data-baseweb='select'] [data-baseweb='select-container']{background:#fff!important;border-color:#ccc!important;border-radius:6px!important;}" +
+    "section[data-testid='stSidebar'] [data-baseweb='select'] *{background:#fff!important;color:#111!important;}" +
+    "section[data-testid='stSidebar'] [data-baseweb='select'] svg{fill:#111!important;}" +
+    
+    "[data-baseweb='tag']{background:#fff!important;border:1.5px solid #555!important;border-radius:20px!important;padding:2px 4px 2px 10px!important;margin:2px!important;}" +
+    "[data-baseweb='tag'] span{color:#111!important;font-size:0.72rem!important;font-weight:500!important;}" +
+    "[data-baseweb='tag'] button{background:transparent!important;margin-left:2px!important;}" +
+    "[data-baseweb='tag'] button svg{fill:#111!important;stroke:#111!important;width:11px!important;height:11px!important;}" +
+    
+    "[data-testid='stSlider'] [role='slider']{background:#C8D400!important;border:2px solid #C8D400!important;width:22px!important;height:22px!important;top:-9px!important;}" +
+    "[data-testid='stSlider'] [data-testid='stSliderTrack'] > div:first-child{background:#C8D400!important;}" +
+    
+    ".stButton>button{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.62rem!important;font-weight:600!important;letter-spacing:0.1em!important;text-transform:uppercase!important;padding:0.85rem 1.5rem!important;width:100%!important;transition:all 0.25s!important;}" +
+    ".stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}" +
+    
+    ".metric-card{background:#fff;border:1px solid #E8E8E4;border-top:3px solid #111;padding:1.2rem 0.8rem;text-align:center;}" +
+    ".metric-value{font-family:Montserrat,sans-serif;font-size:1.8rem;font-weight:700;color:#111;line-height:1;margin-bottom:0.3rem;}" +
+    ".metric-label{font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#999;font-weight:600;}" +
+    ".metric-note{font-size:0.42rem;color:#bbb;margin-top:0.3rem;}" +
+    
+    ".section-label{font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#999;font-weight:600;margin-bottom:0.8rem;margin-top:1.5rem;border-bottom:1px solid #E8E8E4;padding-bottom:0.4rem;}" +
+    
+    ".stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.75rem!important;}" +
+    ".stDataFrame th{background:#F5F5F3!important;color:#111!important;font-weight:600!important;}" +
+    
+    ".stDownloadButton>button{background:transparent!important;color:#111!important;border:1px solid #111!important;border-radius:24px!important;font-size:0.55rem!important;letter-spacing:0.1em!important;text-transform:uppercase!important;font-weight:600!important;}" +
+    ".stDownloadButton>button:hover{background:#111!important;color:#fff!important;}" +
+    "#MainMenu,footer,header{visibility:hidden;}" +
+    "</style>", unsafe_allow_html=True)
     _, col, _ = st.columns([1,1,1])
     with col:
         st.markdown("<div style='text-align:center;padding:5rem 0 2rem'><img src='https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png' style='width:100px;height:100px;border-radius:50%;'><br><br><span style='font-size:0.55rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#999'>Private Access</span></div>", unsafe_allow_html=True)
@@ -169,13 +206,15 @@ def make_charts(df, city_summary):
     return fig
 
 with st.sidebar:
-    st.markdown('<div style="text-align:center;padding:0.8rem 0 0.3rem;"><div style="font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#555;margin-bottom:0.5rem;">Brand logo</div></div>', unsafe_allow_html=True)
-    st.markdown("<div style='font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:#666;margin-bottom:0.4rem;'>Client brand logo</div>", unsafe_allow_html=True)
+    LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress_for_good_logo copy.png"
+    st.markdown(f'<div style="text-align:center;padding:1rem 0 0.5rem;"><img src="{LOGO_URL}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;"></div><hr style="border-color:#333;margin:0.3rem 0 0.8rem;">', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:#666;margin-bottom:0.3rem;">Client brand logo</div>', unsafe_allow_html=True)
     uploaded_logo = st.file_uploader("logo", type=["png","jpg","jpeg"], label_visibility="collapsed")
     if uploaded_logo:
-        logo_data = base64.b64encode(uploaded_logo.read()).decode()
-        st.markdown(f'<div style="text-align:center;padding:0.3rem 0 0.8rem;"><img src="data:image/png;base64,{logo_data}" style="max-width:130px;max-height:55px;object-fit:contain;"></div>', unsafe_allow_html=True)
-    st.markdown("<hr style='border-color:#333;margin:0.5rem 0 1rem;'>", unsafe_allow_html=True)
+        import base64 as b64lib
+        logo_data = b64lib.b64encode(uploaded_logo.read()).decode()
+        st.markdown(f'<div style="text-align:center;padding:0.3rem 0 0.6rem;"><img src="data:image/png;base64,{logo_data}" style="max-width:120px;max-height:50px;object-fit:contain;"></div>', unsafe_allow_html=True)
+    st.markdown('<hr style="border-color:#333;margin:0.5rem 0 0.8rem;">', unsafe_allow_html=True)
     campaign_type = st.selectbox("Campaign Type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
     n_vics = st.slider("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500)
     cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5])
