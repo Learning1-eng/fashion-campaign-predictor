@@ -15,11 +15,11 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    st.markdown("<style>@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');html,body,[class*='css']{background:#fff;color:#111;font-family:Montserrat,sans-serif;}.stApp{background:#fff;}#MainMenu,footer,header{visibility:hidden;}.stButton>button{background:transparent!important;color:#111!important;border:2px solid #111!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.65rem!important;font-weight:600!important;letter-spacing:0.2em!important;text-transform:uppercase!important;padding:0.75rem 2rem!important;transition:all 0.2s!important;}.stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}</style>", unsafe_allow_html=True)
+    st.markdown("<style>@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');html,body,[class*='css']{background:#fff;color:#111;font-family:Montserrat,sans-serif;}.stApp{background:#fff;}#MainMenu,footer,header{visibility:hidden;}.stButton>button{background:transparent!important;color:#111!important;border:2px solid #111!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.65rem!important;font-weight:600!important;letter-spacing:0.12em!important;text-transform:uppercase!important;padding:0.75rem 2rem!important;transition:all 0.2s!important;}.stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}</style>", unsafe_allow_html=True)
     _, col, _ = st.columns([1,1,1])
     with col:
         st.markdown("<div style='text-align:center;padding:5rem 0 2rem'><img src='data:image/png;base64,""' style='width:100px;height:100px;border-radius:50%;'><div style='font-family:Montserrat;font-size:0.55rem;font-weight:600;letter-spacing:0.35em;text-transform:uppercase;color:#999;margin-top:1rem'>Private Access</div></div>", unsafe_allow_html=True)
-        pwd = st.text_input("", type="password", placeholder="Access code")
+        pwd = st.text_input("Access code", type="password", placeholder="Access code", label_visibility="collapsed")
         if st.button("Enter", use_container_width=True):
             if pwd == APP_PASSWORD:
                 st.session_state.authenticated = True
@@ -36,25 +36,25 @@ st.markdown("<style>" +
     ".stApp{background:#FAFAF8;}" +
     "section[data-testid='stSidebar']{background:#111!important;}" +
     "section[data-testid='stSidebar'] *{color:#fff!important;font-family:Montserrat,sans-serif!important;}" +
-    "section[data-testid='stSidebar'] label{font-size:0.55rem!important;letter-spacing:0.25em!important;text-transform:uppercase!important;color:#888!important;font-weight:600!important;}" +
-    ".stButton>button{background:transparent!important;color:#111!important;border:2px solid #111!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.62rem!important;font-weight:600!important;letter-spacing:0.2em!important;text-transform:uppercase!important;padding:0.8rem 2rem!important;width:100%!important;transition:all 0.25s!important;}" +
+    "section[data-testid='stSidebar'] label{font-size:0.55rem!important;letter-spacing:0.15em!important;text-transform:uppercase!important;color:#888!important;font-weight:600!important;}" +
+    ".stButton>button{background:transparent!important;color:#111!important;border:2px solid #111!important;border-radius:24px!important;font-family:Montserrat,sans-serif!important;font-size:0.62rem!important;font-weight:600!important;letter-spacing:0.12em!important;text-transform:uppercase!important;padding:0.8rem 2rem!important;width:100%!important;transition:all 0.25s!important;}" +
     ".stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}" +
-    ".metric-card{background:#fff;border:1px solid #E8E8E4;border-top:3px solid #111;padding:1.4rem 1rem;text-align:center;}" +
-    ".metric-value{font-family:Montserrat,sans-serif;font-size:2rem;font-weight:700;color:#111;line-height:1;margin-bottom:0.4rem;}" +
-    ".metric-label{font-size:0.52rem;letter-spacing:0.28em;text-transform:uppercase;color:#999;font-weight:600;}" +
-    ".section-label{font-size:0.52rem;letter-spacing:0.35em;text-transform:uppercase;color:#999;font-weight:600;margin-bottom:0.8rem;margin-top:1.5rem;border-bottom:1px solid #E8E8E4;padding-bottom:0.5rem;}" +
-    ".stDownloadButton>button{background:transparent!important;color:#111!important;border:1px solid #111!important;border-radius:24px!important;font-size:0.55rem!important;letter-spacing:0.2em!important;text-transform:uppercase!important;font-weight:600!important;}" +
+    ".metric-card{background:#fff;border:1px solid #E8E8E4;border-top:3px solid #111;padding:1.2rem 0.8rem;text-align:center;}" +
+    ".metric-value{font-family:Montserrat,sans-serif;font-size:1.3rem;font-weight:700;color:#111;line-height:1;margin-bottom:0.5rem;letter-spacing:-0.01em;}" +
+    ".metric-label{font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;color:#111;font-weight:600;margin-bottom:0.3rem;}" +
+    ".section-label{font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:#999;font-weight:600;margin-bottom:0.8rem;margin-top:1.5rem;border-bottom:1px solid #E8E8E4;padding-bottom:0.5rem;}" +
+    ".stDownloadButton>button{background:transparent!important;color:#111!important;border:1px solid #111!important;border-radius:24px!important;font-size:0.55rem!important;letter-spacing:0.12em!important;text-transform:uppercase!important;font-weight:600!important;}" +
     ".stDownloadButton>button:hover{background:#111!important;color:#fff!important;}" +
     ".stDataFrame,.stDataFrame *{color:#111!important;font-family:Montserrat,sans-serif!important;font-size:0.75rem!important;}" +
     "#MainMenu,footer,header{visibility:hidden;}" +
     "</style>", unsafe_allow_html=True)
 
 CAMPAIGN_PARAMS = {
-    "social_influencer": {"label":"Social Influencer","base_intent_alpha":3.5,"base_intent_beta":4.0,"engagement_multiplier":1.4,"city_bias":{"Milano":1.05,"Dubai":1.20,"Paris":1.10,"Tokyo":1.15,"New York":1.12,"London":1.08,"Riyadh":1.25,"Singapore":1.18,"Los Angeles":1.10,"Shanghai":1.20},"revenue_per_purchase":(8000,35000)},
-    "digital_ar": {"label":"Digital / AR Experience","base_intent_alpha":2.8,"base_intent_beta":4.5,"engagement_multiplier":1.6,"city_bias":{"Milano":1.10,"Dubai":1.30,"Paris":1.15,"Tokyo":1.35,"New York":1.25,"London":1.15,"Riyadh":1.10,"Singapore":1.30,"Los Angeles":1.20,"Shanghai":1.28},"revenue_per_purchase":(6000,28000)},
-    "product_launch": {"label":"Product Launch","base_intent_alpha":4.5,"base_intent_beta":3.0,"engagement_multiplier":1.2,"city_bias":{"Milano":1.15,"Dubai":1.10,"Paris":1.20,"Tokyo":1.18,"New York":1.22,"London":1.16,"Riyadh":1.08,"Singapore":1.12,"Los Angeles":1.14,"Shanghai":1.10},"revenue_per_purchase":(12000,60000)},
-    "pricing_hike": {"label":"Pricing Hike","base_intent_alpha":2.0,"base_intent_beta":5.0,"engagement_multiplier":0.85,"city_bias":{"Milano":0.90,"Dubai":1.00,"Paris":0.95,"Tokyo":0.88,"New York":0.92,"London":0.94,"Riyadh":1.05,"Singapore":0.96,"Los Angeles":0.89,"Shanghai":0.85},"revenue_per_purchase":(15000,80000)},
-    "private_client_event": {"label":"Private Client Event","base_intent_alpha":5.0,"base_intent_beta":2.5,"engagement_multiplier":1.1,"city_bias":{"Milano":1.20,"Dubai":1.35,"Paris":1.25,"Tokyo":1.15,"New York":1.30,"London":1.22,"Riyadh":1.40,"Singapore":1.18,"Los Angeles":1.15,"Shanghai":1.12},"revenue_per_purchase":(20000,120000)},
+    "social_influencer": {"label":"Social Influencer","base_intent_alpha":3.5,"base_intent_beta":4.0,"engagement_multiplier":1.4,"city_bias":{"Milano":1.05,"Dubai":1.20,"Paris":1.10,"Tokyo":1.15,"New York":1.12,"London":1.08,"Riyadh":1.25,"Singapore":1.18,"Los Angeles":1.10,"Shanghai":1.20},"revenue_per_purchase":(800,3500)},
+    "digital_ar": {"label":"Digital / AR Experience","base_intent_alpha":2.8,"base_intent_beta":4.5,"engagement_multiplier":1.6,"city_bias":{"Milano":1.10,"Dubai":1.30,"Paris":1.15,"Tokyo":1.35,"New York":1.25,"London":1.15,"Riyadh":1.10,"Singapore":1.30,"Los Angeles":1.20,"Shanghai":1.28},"revenue_per_purchase":(600,2800)},
+    "product_launch": {"label":"Product Launch","base_intent_alpha":4.5,"base_intent_beta":3.0,"engagement_multiplier":1.2,"city_bias":{"Milano":1.15,"Dubai":1.10,"Paris":1.20,"Tokyo":1.18,"New York":1.22,"London":1.16,"Riyadh":1.08,"Singapore":1.12,"Los Angeles":1.14,"Shanghai":1.10},"revenue_per_purchase":(1200,6000)},
+    "pricing_hike": {"label":"Pricing Hike","base_intent_alpha":2.0,"base_intent_beta":5.0,"engagement_multiplier":0.85,"city_bias":{"Milano":0.90,"Dubai":1.00,"Paris":0.95,"Tokyo":0.88,"New York":0.92,"London":0.94,"Riyadh":1.05,"Singapore":0.96,"Los Angeles":0.89,"Shanghai":0.85},"revenue_per_purchase":(1500,8000)},
+    "private_client_event": {"label":"Private Client Event","base_intent_alpha":5.0,"base_intent_beta":2.5,"engagement_multiplier":1.1,"city_bias":{"Milano":1.20,"Dubai":1.35,"Paris":1.25,"Tokyo":1.15,"New York":1.30,"London":1.22,"Riyadh":1.40,"Singapore":1.18,"Los Angeles":1.15,"Shanghai":1.12},"revenue_per_purchase":(2000,12000)},
 }
 
 ALL_CITIES = ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"]
@@ -176,9 +176,9 @@ with st.sidebar:
     st.markdown("<div style='margin-top:2rem;text-align:center;'><div style='font-family:Montserrat;font-size:0.7rem;font-weight:600;color:#fff;'>Dress for Good</div><div style='font-family:Montserrat;font-size:0.52rem;color:#666;margin-top:0.3rem;'>Milan, Italy — 2026</div></div>", unsafe_allow_html=True)
 
 st.markdown("<div style='border-bottom:2px solid #111;padding-bottom:1rem;margin-bottom:2rem;'>" +
-    "<div style='font-family:Montserrat;font-size:0.52rem;font-weight:600;letter-spacing:0.4em;text-transform:uppercase;color:#999;margin-bottom:0.5rem;'>Dress for Good — AI Luxury Studio</div>" +
+    "<div style='font-family:Montserrat;font-size:0.52rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:0.5rem;'>Dress for Good — AI Luxury Studio</div>" +
     "<div style='font-family:Montserrat;font-size:2.4rem;font-weight:700;color:#111;line-height:1.1;'>Fashion campaign predictor</div>" +
-    "<div style='font-family:Montserrat;font-size:0.58rem;font-weight:400;letter-spacing:0.15em;color:#999;margin-top:0.5rem;'>Multi-agent simulation — Luxury marketing intelligence</div>" +
+    "<div style='font-family:Montserrat;font-size:0.58rem;font-weight:400;letter-spacing:0.08em;color:#999;margin-top:0.5rem;'>Multi-agent simulation — Luxury marketing intelligence</div>" +
     "</div>", unsafe_allow_html=True)
 
 if not run:
@@ -189,10 +189,17 @@ else:
         summary = compute_summary(df, budget)
     campaign_label = CAMPAIGN_PARAMS[campaign_type]["label"]
     c1,c2,c3,c4,c5 = st.columns(5)
-    kpis = [(f'{summary["buy_rate"]}%',"Buy rate"),(f'{summary["buyers"]:,}',"Buyers"),(f'EUR {summary["total_revenue"]/1000000:.1f}M',"Revenue"),(f'{summary["roi"]:+.0f}%',"ROI"),(f'{summary["total_reach"]//1000:,}K',"Total reach")]
-    for col,(val,label) in zip([c1,c2,c3,c4,c5],kpis):
+    kpis = [(f'{summary["buy_rate"]}%',"Buy rate"),(f'{summary["buyers"]:,}',"Buyers"),(f'EUR {summary["total_revenue"]/1000000:.1f}M',"Revenue"),(f'{summary["roi"]:+.0f}%',"ROI"),(f'{summary["total_reach"]//1000000:.1f}M',"Total reach")]
+    footnotes = [
+        "Beta-dist. intent model",
+        "VICs with intent > threshold",
+        "Avg ticket x buyers",
+        "(Revenue - Budget) / Budget",
+        "Sum influence scores"
+    ]
+    for col,(val,label),fn in zip([c1,c2,c3,c4,c5],kpis,footnotes):
         with col:
-            st.markdown(f"<div class='metric-card'><div class='metric-value'>{val}</div><div class='metric-label'>{label}</div></div>",unsafe_allow_html=True)
+            st.markdown(f"<div class='metric-card'><div class='metric-value'>{val}*</div><div class='metric-label'>{label}</div><div style='font-size:0.42rem;color:#888;margin-top:0.3rem;letter-spacing:0.03em;line-height:1.4;'>{fn}</div></div>",unsafe_allow_html=True)
     st.markdown("<br>",unsafe_allow_html=True)
     st.markdown("<div class='section-label'>Simulation analysis</div>",unsafe_allow_html=True)
     fig = make_charts(df, summary["city_summary"])
@@ -228,3 +235,14 @@ else:
                f"Conversion: {summary['buy_rate']}%. Top market: {top_city}. "
                f"Dominant persona: {top_persona}. Projected revenue: EUR{summary['total_revenue']:,.0f}.")
     st.markdown(f"<div style='font-family:Montserrat;font-size:0.88rem;font-weight:300;color:#111;line-height:1.9;padding:1rem 0 1rem 1.2rem;border-left:3px solid #C8D400;'>{readout}</div>",unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:2rem;padding:1rem;background:#F5F5F3;border-radius:2px;font-family:Montserrat;font-size:0.55rem;color:#999;line-height:1.8;'>" +
+        "<strong style='color:#111;letter-spacing:0.15em;text-transform:uppercase;font-size:0.5rem;'>* Methodology & Data Sources</strong><br><br>" +
+        "<strong>Simulation engine:</strong> Beta-distribution probabilistic model. Purchase intent sampled via Beta(alpha, beta) per agent, calibrated by campaign type, city, persona, and budget factor.<br>" +
+        "<strong>Buy rate:</strong> Share of VIC agents whose sampled intent exceeds a Bernoulli threshold in the simulation.<br>" +
+        "<strong>Revenue:</strong> Uniform distribution within campaign-type revenue range, applied only to purchasing agents. Ranges calibrated on luxury goods average transaction values (BCG Luxury Report 2023, Bain & Co. True-Luxury Global Consumer Insight 2023).<br>" +
+        "<strong>ROI:</strong> (Projected Gross Revenue - Campaign Budget) / Campaign Budget. Does not account for COGS, margins, or indirect costs.<br>" +
+        "<strong>Total reach:</strong> Aggregated influence score per agent, modeled on social media reach distribution (Beta-distributed, 500-100K per agent).<br>" +
+        "<strong>City bias multipliers:</strong> Calibrated on luxury market size indices (Euromonitor International, Statista Luxury Market Outlook 2024).<br>" +
+        "<strong>VIC persona archetypes:</strong> Based on Bain & Co. luxury consumer segmentation framework.<br><br>" +
+        "<em>This tool generates synthetic simulations for strategic scenario planning. Results are probabilistic estimates, not guarantees of business outcomes.</em>" +
+        "</div>", unsafe_allow_html=True)
