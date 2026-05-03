@@ -183,6 +183,7 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
     "Market Segmentation",
     "Churn Prediction",
     "Brand Perception",
+    "VIC Psychographic Engine",
 ])
 
 with tab1:
@@ -613,3 +614,550 @@ with tab8:
             "Internal conflict score measures divergence between ego state activations — high conflict indicates messaging misalignment. "
             "Purchase probability is computed as a weighted function of ego state activation, trigger sensitivity, and campaign parameters."
             "</div>",unsafe_allow_html=True)
+# ============================================================
+# PATCH V3: sostituisci tutto il blocco "with tab8:" esistente
+# con questo codice completo
+# ============================================================
+
+with tab8:
+    st.markdown("<div class='section-label'>VIC Psychographic Engine — TACLA Architecture v3</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#555;font-size:.85rem;margin-bottom:1.2rem;'>"
+        "Each VIC agent is modeled as a dynamic system of three ego states (Parent, Adult, Child) "
+        "with persona-specific Contextual Pattern Memory and an Orchestrator that activates the dominant "
+        "state based on campaign trigger and relationship depth. "
+        "Relationship Depth measures brand internalization in the VIC's psychological system — "
+        "independent of CLV — and modifies ego state baseline and purchase response."
+        "</p>", unsafe_allow_html=True
+    )
+
+    import numpy as np
+    import pandas as pd
+    import plotly.graph_objects as go
+    import random, copy
+    random.seed(42)
+    np.random.seed(42)
+
+    # ── RELATIONSHIP DEPTH DEFINITIONS ─────────────────────────────────────────
+    # Three tiers: New / Established / Legacy
+    # Each shifts ego state baseline and purchase probability modifier
+    # New      → brand not yet internalized → Child dominant (aspiration/curiosity)
+    # Established → partial internalization → Adult dominant (evaluative, comparing)
+    # Legacy   → brand in Parent ego (identity, values, custodian)
+
+    RD_PROFILES = {
+        "New": {
+            "label": "New",
+            "color": "#888888",
+            "description": "Brand not yet internalized. Emotional aspiration drives engagement.",
+            "ego_shift":   {"Parent": -0.10, "Adult": +0.05, "Child": +0.05},
+            "purchase_mod": -8,
+            "conflict_mod": +8,
+            "churn_risk":  "Low — no relationship to lose",
+            "brand_position": "aspirational object",
+        },
+        "Established": {
+            "label": "Established",
+            "color": "#C8D400",
+            "description": "Brand evaluated rationally. VIC compares, benchmarks, negotiates.",
+            "ego_shift":   {"Parent": +0.00, "Adult": +0.10, "Child": -0.10},
+            "purchase_mod": +5,
+            "conflict_mod": -3,
+            "churn_risk":  "Medium — rational exit possible if value perceived as declining",
+            "brand_position": "trusted reference",
+        },
+        "Legacy": {
+            "label": "Legacy",
+            "color": "#111111",
+            "description": "Brand internalized as identity marker. VIC is a custodian, not a consumer.",
+            "ego_shift":   {"Parent": +0.15, "Adult": -0.05, "Child": -0.10},
+            "purchase_mod": +15,
+            "conflict_mod": -10,
+            "churn_risk":  "Low but irreversible — if lost, brand is erased from identity script",
+            "brand_position": "identity anchor",
+        },
+    }
+
+    # ── PERSONA DEFINITIONS ────────────────────────────────────────────────────
+
+    VIC_PROFILES = {
+        "Ultra-HNWI Collector": {
+            "life_script":    "I define the standard. Others follow.",
+            "driver":         "Be Perfect",
+            "base":           {"Parent": 0.65, "Adult": 0.25, "Child": 0.10},
+            "dominant":       "Parent",
+            "expected_tx":    "Parent",
+            "default_rd":     "Legacy",
+            "patterns": {
+                "Parent": ["demands exclusivity proofs", "references heritage lineage", "corrects brand narratives"],
+                "Adult":  ["compares provenance data", "evaluates investment value", "requests authentication"],
+                "Child":  ["reacts with pride to scarcity signals", "feels dismissed by mass messaging"],
+            },
+        },
+        "Heritage Loyalist": {
+            "life_script":    "Tradition is the only luxury that lasts.",
+            "driver":         "Be Strong",
+            "base":           {"Parent": 0.58, "Adult": 0.28, "Child": 0.14},
+            "dominant":       "Parent",
+            "expected_tx":    "Parent",
+            "default_rd":     "Legacy",
+            "patterns": {
+                "Parent": ["defends craftsmanship standards", "resists innovation framing", "values institutional authority"],
+                "Adult":  ["tracks artisan credentials", "verifies material sourcing", "reads brand archives"],
+                "Child":  ["nostalgic response to legacy campaigns", "anxiety at modernisation signals"],
+            },
+        },
+        "Private Client": {
+            "life_script":    "I make informed decisions others can't access.",
+            "driver":         "Try Hard",
+            "base":           {"Parent": 0.20, "Adult": 0.60, "Child": 0.20},
+            "dominant":       "Adult",
+            "expected_tx":    "Adult",
+            "default_rd":     "Established",
+            "patterns": {
+                "Parent": ["sets personal standards for service level", "expects protocol adherence"],
+                "Adult":  ["price/quality benchmarking", "evaluates ROI on experience", "reads fine print"],
+                "Child":  ["excitement at personalised access", "frustration at generic treatment"],
+            },
+        },
+        "Digital Native HNWI": {
+            "life_script":    "I discover before it becomes mainstream.",
+            "driver":         "Hurry Up",
+            "base":           {"Parent": 0.15, "Adult": 0.40, "Child": 0.45},
+            "dominant":       "Child",
+            "expected_tx":    "Child",
+            "default_rd":     "Established",
+            "patterns": {
+                "Parent": ["brand accountability expectations", "sustainability as values signal"],
+                "Adult":  ["algorithmic research before purchase", "cross-platform price check"],
+                "Child":  ["FOMO activation on drops", "shareability as purchase driver", "reacts to peer validation"],
+            },
+        },
+        "Aspirational Buyer": {
+            "life_script":    "One day I will belong here.",
+            "driver":         "Please Others",
+            "base":           {"Parent": 0.25, "Adult": 0.30, "Child": 0.45},
+            "dominant":       "Child",
+            "expected_tx":    "Child",
+            "default_rd":     "New",
+            "patterns": {
+                "Parent": ["internalised social norms about luxury", "guilt at price points"],
+                "Adult":  ["extensive pre-purchase research", "discount sensitivity"],
+                "Child":  ["emotional response to aspirational imagery", "identity projection onto brand"],
+            },
+        },
+        "Trend Setter": {
+            "life_script":    "I shape culture, not follow it.",
+            "driver":         "Be Strong",
+            "base":           {"Parent": 0.20, "Adult": 0.30, "Child": 0.50},
+            "dominant":       "Child",
+            "expected_tx":    "Child",
+            "default_rd":     "New",
+            "patterns": {
+                "Parent": ["cultural authority stance", "dismisses derivative work"],
+                "Adult":  ["trend analytics awareness", "evaluates cultural capital ROI"],
+                "Child":  ["spontaneous adoption of novelty", "strong aesthetic emotional response"],
+            },
+        },
+    }
+
+    # ── TRIGGER MAP ────────────────────────────────────────────────────────────
+
+    TRIGGER_TX_MAP = {
+        "Exclusivity":     {"brand_ego": "Parent", "label": "Brand speaks: Parent (authority/scarcity)"},
+        "Price Hike":      {"brand_ego": "Parent", "label": "Brand speaks: Parent (rules/positioning)"},
+        "New Product":     {"brand_ego": "Child",  "label": "Brand speaks: Child (excitement/novelty)"},
+        "Heritage Story":  {"brand_ego": "Parent", "label": "Brand speaks: Parent (tradition/legacy)"},
+        "Sustainability":  {"brand_ego": "Adult",  "label": "Brand speaks: Adult (facts/accountability)"},
+        "Personalisation": {"brand_ego": "Adult",  "label": "Brand speaks: Adult (rational tailoring)"},
+        "Scarcity Drop":   {"brand_ego": "Child",  "label": "Brand speaks: Child (FOMO/urgency)"},
+        "Brand Collab":    {"brand_ego": "Child",  "label": "Brand speaks: Child (cultural energy)"},
+    }
+
+    # ── HELPER FUNCTIONS ───────────────────────────────────────────────────────
+
+    def transaction_type(brand_ego, expected_tx):
+        if brand_ego == expected_tx:
+            return "Complementary", "#2D6A2D", "✓"
+        return "Crossed", "#C0392B", "✗"
+
+    def compute_ego_activation(base, trigger, persona_name, rd_key):
+        w = copy.deepcopy(base)
+        brand_ego  = TRIGGER_TX_MAP[trigger]["brand_ego"]
+        rd_profile = RD_PROFILES[rd_key]
+
+        # 1. Trigger shifts
+        trigger_shifts = {
+            "Exclusivity":     {"Parent": +0.12, "Adult": -0.05, "Child": -0.07},
+            "Price Hike":      {"Parent": +0.08, "Adult": +0.10, "Child": -0.18},
+            "New Product":     {"Child":  +0.15, "Adult": +0.05, "Parent": -0.20},
+            "Heritage Story":  {"Parent": +0.15, "Adult": +0.00, "Child": -0.15},
+            "Sustainability":  {"Adult":  +0.18, "Parent": -0.05, "Child": -0.13},
+            "Personalisation": {"Adult":  +0.12, "Child":  +0.08, "Parent": -0.20},
+            "Scarcity Drop":   {"Child":  +0.20, "Adult":  -0.05, "Parent": -0.15},
+            "Brand Collab":    {"Child":  +0.18, "Adult":  +0.02, "Parent": -0.20},
+        }
+        for ego, delta in trigger_shifts[trigger].items():
+            w[ego] = max(0.05, min(0.90, w[ego] + delta))
+
+        # 2. Relationship Depth shift (modifies ego baseline before noise)
+        for ego, delta in rd_profile["ego_shift"].items():
+            w[ego] = max(0.04, min(0.92, w[ego] + delta))
+
+        # 3. Normalise
+        total = sum(w.values())
+        w = {k: v / total for k, v in w.items()}
+
+        # 4. Differential noise — Adult lower variance, Parent/Child higher
+        noise = {"Parent": 0.04, "Adult": 0.02, "Child": 0.05}
+        for ego in w:
+            w[ego] = max(0.04, w[ego] + random.gauss(0, noise[ego]))
+        total = sum(w.values())
+        w = {k: v / total for k, v in w.items()}
+
+        dominant = max(w, key=w.get)
+        conflict  = round(100 * (1 - max(w.values())) + rd_profile["conflict_mod"], 1)
+        conflict  = max(5.0, min(90.0, conflict))
+
+        # 5. Purchase probability
+        tx_type, _, _ = transaction_type(brand_ego, VIC_PROFILES[persona_name]["expected_tx"])
+        base_prob     = w[dominant] * 100
+        tx_bonus      = 12 if tx_type == "Complementary" else -15
+        rd_bonus      = rd_profile["purchase_mod"]
+        purchase_prob = round(min(95, max(5, base_prob + tx_bonus + rd_bonus + random.gauss(0, 3))), 1)
+
+        return w, dominant, conflict, purchase_prob
+
+    # ── UI CONTROLS ────────────────────────────────────────────────────────────
+
+    col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([1, 1, 2])
+    with col_ctrl1:
+        tc_trigger = st.selectbox(
+            "Campaign Trigger",
+            list(TRIGGER_TX_MAP.keys()),
+            key="tc_trigger_v3"
+        )
+    with col_ctrl2:
+        rd_selected = st.selectbox(
+            "Relationship Depth",
+            list(RD_PROFILES.keys()),
+            index=1,
+            key="rd_selector"
+        )
+    with col_ctrl3:
+        rd_info = RD_PROFILES[rd_selected]
+        st.markdown(
+            f"<div style='margin-top:1.6rem;padding:.55rem 1rem;"
+            f"background:#F5F5F3;border-left:3px solid {rd_info['color']};"
+            f"font-size:.78rem;color:#111;line-height:1.6;'>"
+            f"<strong>{rd_info['label']}</strong> — {rd_info['description']} "
+            f"Brand position: <em>{rd_info['brand_position']}</em>. "
+            f"Churn risk: <em>{rd_info['churn_risk']}</em>."
+            f"</div>", unsafe_allow_html=True
+        )
+
+    brand_ego_label = TRIGGER_TX_MAP[tc_trigger]["label"]
+    st.markdown(
+        f"<div style='margin-bottom:1rem;padding:.5rem 1rem;"
+        f"background:#F5F5F3;border-left:3px solid #111;"
+        f"font-size:.78rem;color:#555;'>"
+        f"{brand_ego_label} &nbsp;·&nbsp; "
+        f"Relationship Depth modifies ego state baseline and purchase response independently of CLV."
+        f"</div>", unsafe_allow_html=True
+    )
+
+    # ── COMPUTE ────────────────────────────────────────────────────────────────
+
+    rows = []
+    for persona, profile in VIC_PROFILES.items():
+        w, dominant, conflict, purchase_prob = compute_ego_activation(
+            profile["base"], tc_trigger, persona, rd_selected
+        )
+        brand_ego = TRIGGER_TX_MAP[tc_trigger]["brand_ego"]
+        tx_type, tx_color, tx_symbol = transaction_type(brand_ego, profile["expected_tx"])
+        rows.append({
+            "Persona":                  persona,
+            "Driver":                   profile["driver"],
+            "Rel. Depth":               rd_selected,
+            "Parent (%)":               round(w["Parent"] * 100, 1),
+            "Adult (%)":                round(w["Adult"]  * 100, 1),
+            "Child (%)":                round(w["Child"]  * 100, 1),
+            "Dominant Ego State":       dominant,
+            "Internal Conflict":        conflict,
+            "Purchase Probability (%)": purchase_prob,
+            "Transaction Type":         tx_type,
+            "TX Color":                 tx_color,
+            "Expected TX":              profile["expected_tx"],
+            "Active Pattern":           random.choice(profile["patterns"][dominant]),
+        })
+
+    tc_df = pd.DataFrame(rows)
+
+    # ── RELATIONSHIP DEPTH IMPACT SUMMARY ──────────────────────────────────────
+
+    avg_pp     = tc_df["Purchase Probability (%)"].mean()
+    avg_conf   = tc_df["Internal Conflict"].mean()
+    comp_count = len(tc_df[tc_df["Transaction Type"] == "Complementary"])
+    total_count = len(tc_df)
+    align_pct  = round(comp_count / total_count * 100)
+
+    banner_color = "#2D6A2D" if align_pct >= 50 else "#C0392B"
+    banner_bg    = "#EAF5EA" if align_pct >= 50 else "#FDECEA"
+    risk_label   = "LOW MISALIGNMENT RISK" if align_pct >= 50 else "HIGH MISALIGNMENT RISK"
+
+    col_b1, col_b2, col_b3 = st.columns(3)
+    with col_b1:
+        st.markdown(
+            f"<div style='padding:.8rem 1rem;background:#F5F5F3;"
+            f"border-top:3px solid {rd_info['color']};text-align:center;'>"
+            f"<div style='font-size:.55rem;color:#888;text-transform:uppercase;"
+            f"letter-spacing:.08em;'>Avg Purchase Probability</div>"
+            f"<div style='font-size:1.6rem;font-weight:700;color:#111;'>{avg_pp:.0f}%</div>"
+            f"<div style='font-size:.7rem;color:#555;'>at {rd_selected} depth</div>"
+            f"</div>", unsafe_allow_html=True
+        )
+    with col_b2:
+        st.markdown(
+            f"<div style='padding:.8rem 1rem;background:#F5F5F3;"
+            f"border-top:3px solid #C8D400;text-align:center;'>"
+            f"<div style='font-size:.55rem;color:#888;text-transform:uppercase;"
+            f"letter-spacing:.08em;'>Transaction Alignment</div>"
+            f"<div style='font-size:1.6rem;font-weight:700;color:{banner_color};'>{align_pct}%</div>"
+            f"<div style='font-size:.7rem;color:#555;'>{comp_count}/{total_count} complementary</div>"
+            f"</div>", unsafe_allow_html=True
+        )
+    with col_b3:
+        st.markdown(
+            f"<div style='padding:.8rem 1rem;background:#F5F5F3;"
+            f"border-top:3px solid #888;text-align:center;'>"
+            f"<div style='font-size:.55rem;color:#888;text-transform:uppercase;"
+            f"letter-spacing:.08em;'>Avg Internal Conflict</div>"
+            f"<div style='font-size:1.6rem;font-weight:700;color:#111;'>{avg_conf:.0f}%</div>"
+            f"<div style='font-size:.7rem;color:#555;'>portfolio mean</div>"
+            f"</div>", unsafe_allow_html=True
+        )
+
+    st.markdown("<div style='margin-top:.8rem'></div>", unsafe_allow_html=True)
+
+    # ── CHARTS ─────────────────────────────────────────────────────────────────
+
+    col_c1, col_c2 = st.columns(2)
+
+    with col_c1:
+        st.markdown("<div class='section-label'>Ego State Distribution by VIC</div>", unsafe_allow_html=True)
+        fig_bar = go.Figure()
+        colors_ego = {"Parent": "#111111", "Adult": "#C8D400", "Child": "#888888"}
+        for ego in ["Parent", "Adult", "Child"]:
+            fig_bar.add_trace(go.Bar(
+                name=ego,
+                x=tc_df["Persona"],
+                y=tc_df[f"{ego} (%)"],
+                marker_color=colors_ego[ego],
+                marker_line_width=0,
+            ))
+        fig_bar.update_layout(
+            barmode="stack",
+            paper_bgcolor="#fff", plot_bgcolor="#fff",
+            height=280, margin=dict(l=10, r=10, t=10, b=80),
+            font=dict(family="Montserrat", color="#111", size=9),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(size=8)),
+            xaxis=dict(tickangle=-30, tickfont=dict(size=7)),
+            yaxis=dict(gridcolor="#E8E8E4", ticksuffix="%"),
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    with col_c2:
+        st.markdown("<div class='section-label'>Conflict vs Purchase Probability</div>", unsafe_allow_html=True)
+        fig_scatter = go.Figure()
+        for _, row in tc_df.iterrows():
+            marker_symbol = "circle" if row["Transaction Type"] == "Complementary" else "x"
+            fig_scatter.add_trace(go.Scatter(
+                x=[row["Internal Conflict"]],
+                y=[row["Purchase Probability (%)"]],
+                mode="markers+text",
+                marker=dict(
+                    color=row["TX Color"], size=10,
+                    symbol=marker_symbol,
+                    line=dict(width=1.5, color=row["TX Color"])
+                ),
+                text=[row["Persona"].split()[0]],
+                textposition="top center",
+                textfont=dict(size=7),
+                showlegend=False,
+                hovertemplate=(
+                    f"<b>{row['Persona']}</b><br>"
+                    f"Rel. Depth: {rd_selected}<br>"
+                    f"Transaction: {row['Transaction Type']}<br>"
+                    f"Conflict: {row['Internal Conflict']}%<br>"
+                    f"Purchase: {row['Purchase Probability (%)']}%"
+                    f"<extra></extra>"
+                )
+            ))
+        for label, color, symbol in [("Complementary ✓", "#2D6A2D", "circle"), ("Crossed ✗", "#C0392B", "x")]:
+            fig_scatter.add_trace(go.Scatter(
+                x=[None], y=[None], mode="markers",
+                marker=dict(color=color, size=8, symbol=symbol),
+                name=label, showlegend=True
+            ))
+        fig_scatter.update_layout(
+            paper_bgcolor="#fff", plot_bgcolor="#fff",
+            height=280, margin=dict(l=10, r=10, t=10, b=10),
+            font=dict(family="Montserrat", color="#111", size=9),
+            xaxis=dict(title="Internal Conflict (%)", gridcolor="#E8E8E4", tickfont=dict(size=8)),
+            yaxis=dict(title="Purchase Probability (%)", gridcolor="#E8E8E4", tickfont=dict(size=8)),
+            legend=dict(font=dict(size=8), orientation="h", yanchor="bottom", y=1.02),
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+    # ── CROSSED TRANSACTION DETAIL ──────────────────────────────────────────────
+
+    crossed_df = tc_df[tc_df["Transaction Type"] == "Crossed"]
+    if not crossed_df.empty:
+        st.markdown("<div class='section-label'>Crossed Transaction Analysis — Strategic Risk</div>", unsafe_allow_html=True)
+        brand_ego = TRIGGER_TX_MAP[tc_trigger]["brand_ego"]
+        for _, row in crossed_df.iterrows():
+            rd_note = ""
+            if rd_selected == "Legacy":
+                rd_note = " At Legacy depth, this crossed transaction carries elevated churn risk — brand is identity-anchored and misalignment is experienced as a values breach."
+            elif rd_selected == "New":
+                rd_note = " At New depth, crossed transaction limits first-impression conversion but relationship is not yet at risk."
+            st.markdown(
+                f"<div style='padding:.8rem 1rem;margin-bottom:.5rem;"
+                f"border-left:3px solid #C0392B;background:#FDECEA;"
+                f"font-size:.82rem;color:#111;'>"
+                f"<strong>{row['Persona']}</strong> [{rd_selected}] — "
+                f"Campaign speaks <em>{brand_ego}</em> / VIC expects <em>{row['Expected TX']}</em>. "
+                f"Active pattern: <em>\"{row['Active Pattern']}\"</em>. "
+                f"Purchase probability: <strong>{row['Purchase Probability (%)']}%</strong>.{rd_note}"
+                f"<br><span style='color:#C0392B;font-size:.75rem;'>"
+                f"Recommendation: reframe toward {row['Expected TX']} register to resolve mismatch.</span>"
+                f"</div>", unsafe_allow_html=True
+            )
+    else:
+        st.markdown(
+            "<div style='padding:.8rem 1rem;border-left:3px solid #2D6A2D;"
+            "background:#EAF5EA;font-size:.82rem;color:#111;'>"
+            "All VIC receive complementary transactions under this configuration. "
+            "Campaign message register is fully aligned with the psychographic portfolio at "
+            f"{rd_selected} relationship depth."
+            "</div>", unsafe_allow_html=True
+        )
+
+    # ── STRATEGIC READOUT ──────────────────────────────────────────────────────
+
+    st.markdown("<div class='section-label'>Strategic Readout</div>", unsafe_allow_html=True)
+    top_persona  = tc_df.loc[tc_df["Purchase Probability (%)"].idxmax(), "Persona"]
+    parent_pct   = round(len(tc_df[tc_df["Dominant Ego State"] == "Parent"]) / len(tc_df) * 100, 0)
+    adult_pct    = round(len(tc_df[tc_df["Dominant Ego State"] == "Adult"])  / len(tc_df) * 100, 0)
+    child_pct    = round(len(tc_df[tc_df["Dominant Ego State"] == "Child"])  / len(tc_df) * 100, 0)
+
+    rd_strategic = {
+        "New":         "New depth suppresses Parent activation and amplifies Child responses — the brand is still an aspirational object, not an identity anchor. Campaign should prioritise emotional entry points over heritage or authority registers.",
+        "Established": "Established depth activates Adult ego state most strongly — VIC are in evaluation mode, benchmarking value and service quality. Rational-register messaging and personalisation outperform emotional or authority-based triggers at this stage.",
+        "Legacy":      "Legacy depth shifts baseline toward Parent dominance — the VIC has internalized the brand as a values system. Heritage, exclusivity and custodianship triggers resonate most. Any innovation or collab messaging risks a crossed transaction with this segment.",
+    }
+
+    conflict_read = (
+        "High portfolio conflict signals competing ego state activation — "
+        "the trigger produces psychological ambivalence across multiple VIC."
+        if avg_conf > 35 else
+        "Low portfolio conflict indicates clear ego state dominance — "
+        "psychologically coherent response across the VIC portfolio."
+    )
+
+    st.markdown(
+        f"<div style='padding:1rem 1.2rem;border-left:3px solid #C8D400;"
+        f"font-size:.88rem;color:#111;line-height:1.9;'>"
+        f"Under a <strong>{tc_trigger}</strong> trigger at <strong>{rd_selected}</strong> relationship depth: "
+        f"<strong>{int(parent_pct)}%</strong> Parent · "
+        f"<strong>{int(adult_pct)}%</strong> Adult · "
+        f"<strong>{int(child_pct)}%</strong> Child dominant. "
+        f"Avg conflict: <strong>{avg_conf:.0f}%</strong>. {conflict_read} "
+        f"Highest conversion: <strong>{top_persona}</strong> at <strong>{tc_df['Purchase Probability (%)'].max():.0f}%</strong>. "
+        f"Transaction alignment: <strong>{align_pct}%</strong>. "
+        f"{rd_strategic[rd_selected]}"
+        f"</div>", unsafe_allow_html=True
+    )
+
+    # ── DATA TABLE ─────────────────────────────────────────────────────────────
+
+    st.markdown("<div class='section-label'>VIC Psychographic Data</div>", unsafe_allow_html=True)
+    display_df = tc_df[[
+        "Persona", "Driver", "Rel. Depth", "Dominant Ego State", "Transaction Type",
+        "Parent (%)", "Adult (%)", "Child (%)",
+        "Internal Conflict", "Purchase Probability (%)", "Active Pattern"
+    ]].copy()
+
+    def style_tx(val):
+        if val == "Complementary": return "color:#2D6A2D;font-weight:600"
+        if val == "Crossed":       return "color:#C0392B;font-weight:600"
+        return ""
+
+    fmt = {
+        "Parent (%)":"{:.1f}", "Adult (%)":"{:.1f}", "Child (%)":"{:.1f}",
+        "Internal Conflict":"{:.1f}", "Purchase Probability (%)":"{:.1f}"
+    }
+    st.dataframe(
+        display_df.style.format(fmt).applymap(style_tx, subset=["Transaction Type"]),
+        use_container_width=True, height=280, hide_index=True
+    )
+
+    # ── METHODOLOGY NOTE ───────────────────────────────────────────────────────
+
+    st.markdown(
+        "<div style='margin-top:1.8rem;padding:1.2rem 1.4rem;background:#F5F5F3;"
+        "font-size:.55rem;color:#888;line-height:2;'>"
+        "<strong style='color:#111;text-transform:uppercase;font-size:.5rem;"
+        "letter-spacing:.1em;'>Methodology — TACLA Architecture v3</strong><br><br>"
+
+        "<strong style='color:#111;'>Theoretical Foundation.</strong> "
+        "This engine implements the TACLA (Transactional Analysis Contextual LLM-based Agents) "
+        "architecture as formalized by Zamojska &amp; Chudziak (2025, arXiv:2510.17913) and the "
+        "antecedent Trans-ACT framework (arXiv:2507.21354), grounded in Transactional Analysis "
+        "theory (Berne, 1958, 1961, 1964; Stewart &amp; Joines, 2012). "
+        "Each VIC agent is modeled as a dynamic system of three ego states — "
+        "<strong style='color:#111;'>Parent</strong> (internalized values, authority-derived norms), "
+        "<strong style='color:#111;'>Adult</strong> (rational processing, present-moment analysis), "
+        "<strong style='color:#111;'>Child</strong> (emotional responses, formative behavioral patterns) "
+        "— each with a dedicated Contextual Pattern Memory.<br><br>"
+
+        "<strong style='color:#111;'>Relationship Depth Layer.</strong> "
+        "Version 3 introduces Relationship Depth as an independent psychological variable, "
+        "distinct from CLV. While CLV measures cumulative transaction value, Relationship Depth "
+        "measures the degree to which the brand has been internalized within the VIC's ego state "
+        "system — specifically, whether the brand occupies an aspirational object position (New), "
+        "a trusted evaluative reference (Established), or an identity anchor in the Parent ego "
+        "state (Legacy). Each depth tier applies a directional shift to the ego state baseline "
+        "prior to trigger activation, modifies internal conflict score, and adjusts purchase "
+        "probability independently of the transaction alignment signal. "
+        "This operationalizes the TA concept of script integration: a Legacy VIC has incorporated "
+        "the brand into their life script (Berne, 1972), making crossed transactions experienced "
+        "as values breaches rather than mere preference mismatches — with materially higher "
+        "silent churn risk.<br><br>"
+
+        "<strong style='color:#111;'>Orchestrator &amp; Activation.</strong> "
+        "Ego state activation follows a three-stage computation: "
+        "(1) trigger-induced shifts applied to persona base weights; "
+        "(2) Relationship Depth modulation applied to the shifted weights; "
+        "(3) differential noise — Adult variance equivalent to temperature 0.3, "
+        "Parent and Child to temperature 0.7 — consistent with TACLA's LLM configuration. "
+        "A persona-specific Driver (Stewart &amp; Joines, 2002) provides directional pressure "
+        "on ego state selection under conflict.<br><br>"
+
+        "<strong style='color:#111;'>Crossed vs Complementary Transactions.</strong> "
+        "Each trigger is classified by the ego state register it activates in the brand message. "
+        "A complementary transaction occurs when brand ego matches VIC expected ego state — "
+        "augmenting purchase probability. A crossed transaction signals structural misalignment "
+        "between brand communication register and VIC psychological expectation. "
+        "At Legacy depth, crossed transactions carry elevated churn risk; "
+        "at New depth, they represent a missed acquisition signal rather than a retention risk.<br><br>"
+
+        "<strong style='color:#111;'>References.</strong> "
+        "Berne, E. (1961). <em>Transactional Analysis in Psychotherapy.</em> Grove Press. — "
+        "Berne, E. (1964). <em>Games People Play.</em> Grove Press. — "
+        "Berne, E. (1972). <em>What Do You Say After You Say Hello?</em> Grove Press. — "
+        "Stewart, I. &amp; Joines, V. (2012). <em>TA Today.</em> Lifespace Publishing. — "
+        "Zamojska &amp; Chudziak (2025). Trans-ACT. arXiv:2507.21354. — "
+        "Zamojska &amp; Chudziak (2025). TACLA. arXiv:2510.17913."
+        "</div>", unsafe_allow_html=True
+    )
