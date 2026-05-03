@@ -168,7 +168,7 @@ VIC_PERSONAS = [
     ("Asia Pacific VIC",        0.05, 1.4, 1.2),
 ]
 
-def run_simulation(campaign_type, n_vics, cities, budget, seed=42):
+def run_simulation(campaign_type, n_vics, cities, budget, seed=42, brand_city_bias=None):
     rng = np.random.default_rng(seed)
     cp = CAMPAIGN_PARAMS[campaign_type]
     n_sim = max(n_vics, 1000)
@@ -294,8 +294,9 @@ with tab1:
     if st.button("Run Simulation", key="run_tab1"):
         _bp1 = st.session_state.get("brand_profile") or {}
         _brand_seed = hash(st.session_state.get("_last_brand","")) % 10000
+        _brand_city_bias = _bp1.get("city_bias", None)
         with st.spinner("Running simulation..."):
-            df = run_simulation(campaign_type, n_vics, cities, budget, seed=42+_brand_seed)
+            df = run_simulation(campaign_type, n_vics, cities, budget, seed=42+_brand_seed, brand_city_bias=_brand_city_bias)
             summary = compute_summary(df, budget)
         c1,c2,c3,c4,c5 = st.columns(5)
         kpis = [
