@@ -129,7 +129,7 @@ button[data-testid="baseButton-secondary"]:hover{background:#C8D400!important;co
 [data-baseweb='tag'] span{color:#111!important;font-size:.72rem!important;font-weight:500!important;white-space:nowrap!important;}
 [data-baseweb='tag'] button{background:transparent!important;border:none!important;padding:0!important;}
 [data-baseweb='tag'] button svg{fill:#111!important;width:11px!important;height:11px!important;}
-[data-baseweb='multi-select']{background:#fff!important;border:1px solid #555!important;border-radius:4px!important;}[data-baseweb='input']{border-color:#555!important;}[data-baseweb='base-input']{border-color:#555!important;}div[data-testid='stNumberInput'] > div{border-color:#555!important;outline:none!important;}div[data-testid='stNumberInput'] input:focus{box-shadow:none!important;border-color:#111!important;}
+[data-baseweb='multi-select']{background:#fff!important;border:1px solid #555!important;border-radius:4px!important;}[data-baseweb='input']{border-color:#E8E8E4!important;}[data-baseweb='base-input']{border-color:#E8E8E4!important;}[data-baseweb='select']{border-color:#E8E8E4!important;}div[data-baseweb='select'] > div{border-color:#E8E8E4!important;}input:focus{box-shadow:none!important;outline:none!important;border-color:#111!important;}[data-baseweb='select']:focus-within{border-color:#111!important;}
 button[data-testid="stNumberInput-StepDown"],button[data-testid="stNumberInput-StepUp"]{background:#111!important;color:#fff!important;border:none!important;}
 button[data-testid="stNumberInput-StepDown"]:hover,button[data-testid="stNumberInput-StepUp"]:hover{background:#C8D400!important;color:#111!important;}
 :root{--primary-color:#111111!important;--secondary-background-color:#F5F5F3!important;}
@@ -271,16 +271,23 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
 ])
 
 with tab1:
-    ct_col1, ct_col2, ct_col3, ct_col4 = st.columns([1.2,1,1.5,1])
+    REGION_MAP = {
+        "All markets":    ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"],
+        "Europe":         ["Milano","Paris","London"],
+        "Middle East":    ["Dubai","Riyadh"],
+        "Asia Pacific":   ["Tokyo","Shanghai","Singapore"],
+        "Americas":       ["New York","Los Angeles"],
+    }
+    ct_col1, ct_col2, ct_col3, ct_col4 = st.columns([1.4,1,1,1])
     with ct_col1:
-        campaign_type = st.selectbox("Campaign type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
+        campaign_type = st.selectbox("Campaign type", options=list(CAMPAIGN_PARAMS.keys()), format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
     with ct_col2:
-        n_vics = st.number_input("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500,key="n_vics_tab1")
+        region = st.selectbox("Target region", list(REGION_MAP.keys()), key="region_tab1")
+        cities = REGION_MAP[region]
     with ct_col3:
-        cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5],key="cities_tab1")
-        if not cities: cities = ALL_CITIES[:3]
+        n_vics = st.selectbox("VIC Pool Size", [1000,2000,5000,10000,20000,50000], index=2, key="n_vics_tab1")
     with ct_col4:
-        budget = st.number_input("Campaign Budget (EUR)",min_value=50000,max_value=20000000,value=500000,step=50000,key="budget_tab1")
+        budget = st.selectbox("Budget (EUR)", [50000,100000,250000,500000,1000000,2000000,5000000], index=3, format_func=lambda x:f"EUR {x:,.0f}", key="budget_tab1")
     st.markdown("<br>",unsafe_allow_html=True)
     if st.button("Run Simulation", key="run_tab1"):
         _bp1 = st.session_state.get("brand_profile") or {}
