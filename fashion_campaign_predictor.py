@@ -1098,7 +1098,7 @@ with tab8:
         "Internal Conflict":"{:.1f}", "Purchase Probability (%)":"{:.1f}"
     }
     st.dataframe(
-        display_df.style.format(fmt).applymap(style_tx, subset=["Transaction Type"]),
+        display_df.style.format(fmt).map(style_tx, subset=["Transaction Type"]),
         use_container_width=True, height=280, hide_index=True
     )
 
