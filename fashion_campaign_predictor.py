@@ -85,6 +85,8 @@ button[data-testid="baseButton-secondary"]:hover{background:#C8D400!important;co
 [data-baseweb='tag'] button{background:transparent!important;border:none!important;padding:0!important;}
 [data-baseweb='tag'] button svg{fill:#111!important;width:11px!important;height:11px!important;}
 [data-baseweb='multi-select']{background:#fff!important;border:1px solid #555!important;border-radius:4px!important;}
+button[data-testid="stNumberInput-StepDown"],button[data-testid="stNumberInput-StepUp"]{background:#111!important;color:#fff!important;border:none!important;}
+button[data-testid="stNumberInput-StepDown"]:hover,button[data-testid="stNumberInput-StepUp"]:hover{background:#C8D400!important;color:#111!important;}
 """
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
@@ -383,9 +385,25 @@ with tab5:
         ms_df = pd.DataFrame(ms_data)
         pivot = ms_df.pivot_table(index="Persona", columns="City", values="Buy Rate (%)", aggfunc="mean").round(1)
         st.markdown("<div class='section-label'>Buy Rate Heatmap — Persona × City</div>",unsafe_allow_html=True)
-        fig_ms = go.Figure(go.Heatmap(z=pivot.values, x=pivot.columns.tolist(), y=pivot.index.tolist(),
-            colorscale=[[0,"#F5F5F3"],[0.5,"#888"],[1,"#111"]], showscale=True))
-        fig_ms.update_layout(paper_bgcolor="#fff", height=350, font=dict(family="Montserrat",color="#111",size=9), margin=dict(l=10,r=10,t=10,b=10))
+        fig_ms = go.Figure(go.Heatmap(
+            z=pivot.values, x=pivot.columns.tolist(), y=pivot.index.tolist(),
+            colorscale=[
+                [0.00, "#FFFFFF"],[0.10, "#F0F0EE"],[0.20, "#D8D8D4"],
+                [0.35, "#AAAAAA"],[0.50, "#888888"],[0.65, "#555555"],
+                [0.80, "#333333"],[0.90, "#1A1A1A"],[1.00, "#000000"]
+            ],
+            showscale=True,
+            colorbar=dict(
+                thickness=12, len=0.9,
+                tickmode="linear", tick0=0, dtick=20,
+                tickfont=dict(family="Montserrat", size=8, color="#111"),
+                outlinewidth=0,
+            ),
+            hovertemplate="%{y} × %{x}<br>Buy Rate: %{z:.1f}%<extra></extra>",
+            texttemplate="%{z:.0f}",
+            textfont=dict(size=7, family="Montserrat"),
+        ))
+        fig_ms.update_layout(paper_bgcolor="#fff", height=400, font=dict(family="Montserrat",color="#111",size=9), margin=dict(l=10,r=10,t=10,b=10))
         st.plotly_chart(fig_ms, use_container_width=True)
         st.dataframe(ms_df.style.format({"VIC Count":"{:,.0f}","Buy Rate (%)":"{:.1f}","Engagement (%)":"{:.1f}"}),use_container_width=True,hide_index=True)
 
