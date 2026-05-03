@@ -76,6 +76,15 @@ div[data-testid='stSidebar'] .stSelectbox label,
 div[data-testid='stSidebar'] .stMultiSelect label,
 div[data-testid='stSidebar'] .stNumberInput label{color:#999!important;font-size:.55rem!important;letter-spacing:.1em!important;text-transform:uppercase!important;}
 div[data-testid='stSidebar'] .stButton>button{background:#C8D400!important;color:#111!important;font-weight:700!important;}
+.stButton>button{background:#111!important;color:#fff!important;border:1px solid #111!important;border-radius:0!important;font-family:Montserrat,sans-serif!important;font-size:.6rem!important;font-weight:700!important;letter-spacing:.2em!important;text-transform:uppercase!important;padding:.85rem 2rem!important;width:100%!important;}
+.stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}
+button[data-testid="baseButton-secondary"]{background:#111!important;color:#fff!important;border:1px solid #111!important;border-radius:0!important;}
+button[data-testid="baseButton-secondary"]:hover{background:#C8D400!important;color:#111!important;}
+[data-baseweb='tag']{background:#fff!important;border:1px solid #111!important;border-radius:20px!important;padding:3px 8px 3px 12px!important;margin:3px!important;display:inline-flex!important;align-items:center!important;gap:8px!important;}
+[data-baseweb='tag'] span{color:#111!important;font-size:.72rem!important;font-weight:500!important;white-space:nowrap!important;}
+[data-baseweb='tag'] button{background:transparent!important;border:none!important;padding:0!important;}
+[data-baseweb='tag'] button svg{fill:#111!important;width:11px!important;height:11px!important;}
+[data-baseweb='multi-select']{background:#fff!important;border:1px solid #555!important;border-radius:4px!important;}
 """
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
@@ -171,10 +180,13 @@ with st.sidebar:
         "Kiko Milano":     {"ego_override": {"Aspirational Buyer":{"Parent":0.10,"Adult":0.30,"Child":0.60},"Digital Native HNWI":{"Parent":0.08,"Adult":0.42,"Child":0.50},"Trend Setter":{"Parent":0.08,"Adult":0.32,"Child":0.60}}, "rd_default": "New", "color": "#C8D400", "note": "Child-dominant — democratised beauty luxury, digital-first, high FOMO sensitivity"},
     }
     typed_brand = st.text_input("", placeholder="e.g. Hermès, Chanel, Dior...", key="typed_brand", label_visibility="collapsed")
-    selected_brand = typed_brand.strip() if typed_brand.strip() else "Generic Luxury"
+    _typed = typed_brand.strip() if typed_brand else ""
+    # Case-insensitive match
+    _matched = next((k for k in BRAND_PROFILES if k.lower() == _typed.lower()), None)
+    selected_brand = _matched if _matched else (_typed if _typed else "Generic Luxury")
     brand_profile = BRAND_PROFILES.get(selected_brand, {"ego_override": None, "rd_default": "Established", "color": "#888", "note": "Custom brand — synthetic baseline applied"})
-    if typed_brand.strip():
-        calibrated = typed_brand.strip() in BRAND_PROFILES
+    if _typed:
+        calibrated = _matched is not None
         note_color = "#C8D400" if calibrated else "#888"
         note_text = brand_profile["note"] if calibrated else f"Custom brand — synthetic baseline applied. Pre-calibrated brands: {', '.join(BRAND_PROFILES.keys())}"
         st.markdown(f'<div style="font-size:.58rem;color:{note_color};line-height:1.5;margin-bottom:.6rem;">{note_text}</div>', unsafe_allow_html=True)
