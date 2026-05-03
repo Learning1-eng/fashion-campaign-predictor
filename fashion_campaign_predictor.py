@@ -63,6 +63,13 @@ css = """
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap');
 html,body,[class*='css']{font-family:Montserrat,sans-serif;background:#FAFAF8;color:#111;}
 .stApp{background:#FAFAF8;}
+:root{--primary-color:#111111!important;--secondary-background-color:#F5F5F3!important;}
+button{background:#111!important;color:#fff!important;border:none!important;}
+*[class*="red"],*[style*="rgb(255"],*[style*="#ff"],*[style*="#FF"]{color:#111!important;background:#111!important;}
+[data-testid="stNumberInput"] button{background:#111!important;color:#fff!important;border:none!important;border-radius:0!important;}
+[data-testid="stNumberInput"] button:hover{background:#C8D400!important;color:#111!important;}
+[data-testid="stNumberInput"] button svg{fill:#fff!important;}
+[data-testid="stNumberInput"] button:hover svg{fill:#111!important;}
 .stTabs [data-baseweb='tab-list']{background:#fff;border-bottom:1px solid #E8E8E4;gap:0;}
 .stTabs [data-baseweb='tab']{font-family:Montserrat,sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#888;padding:.7rem 1.2rem;border-radius:0;}
 .stTabs [aria-selected='true']{color:#111!important;}
@@ -87,6 +94,15 @@ button[data-testid="baseButton-secondary"]:hover{background:#C8D400!important;co
 [data-baseweb='multi-select']{background:#fff!important;border:1px solid #555!important;border-radius:4px!important;}
 button[data-testid="stNumberInput-StepDown"],button[data-testid="stNumberInput-StepUp"]{background:#111!important;color:#fff!important;border:none!important;}
 button[data-testid="stNumberInput-StepDown"]:hover,button[data-testid="stNumberInput-StepUp"]:hover{background:#C8D400!important;color:#111!important;}
+:root{--primary-color:#111111!important;--secondary-background-color:#F5F5F3!important;}
+button{color:#111!important;}
+.stAlert{display:none;}
+[data-baseweb="notification"]{background:#111!important;}
+.stException{border-left:3px solid #111!important;}
+div[data-testid="stNotification"]{background:#111!important;}
+*[style*="color: rgb(255"]{color:#111!important;}
+*[style*="background-color: rgb(255, 75"]{background-color:#111!important;}
+*[style*="background: rgb(255, 75"]{background:#111!important;}
 """
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
