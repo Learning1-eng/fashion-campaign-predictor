@@ -86,7 +86,7 @@ def make_charts(df, city_summary):
     fig.add_trace(go.Histogram(x=df.loc[df["Purchased"],"Purchase Intent"], name="Purchased", marker_color="#111111", opacity=0.85, nbinsx=25), row=1, col=2)
     top = city_summary.sort_values("Revenue (EUR)")
     clrs3 = ["#C8D400" if i==len(top)-1 else "#CCCCCC" for i in range(len(top))]
-    fig.add_trace(go.Bar(y=top["City"], x=top["Revenue (EUR)"]/1000, orientation="h", marker_color=clrs3, showlegend=False), row=1, col=3)
+    fig.add_trace(go.Bar(y=top["City"], x=top["Revenue (EUR)"]/1000, orientation="h", marker_color=clrs3, showlegend=False, hovertemplate="%{y}: EUR %{x:.0f}k<extra></extra>", name="Revenue"), row=1, col=3)
     fig.update_layout(**layout_base, height=250, legend=dict(bgcolor="#fff",bordercolor="#E8E8E4",font=dict(family="Montserrat",size=9)))
     fig.update_xaxes(showgrid=True,gridcolor="#E8E8E4",linecolor="#E8E8E4",tickfont=dict(size=8,color="#111"))
     fig.update_yaxes(showgrid=True,gridcolor="#E8E8E4",linecolor="#E8E8E4",tickfont=dict(size=8,color="#111"))
@@ -145,13 +145,13 @@ div[data-testid="stNotification"]{background:#111!important;}
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
 CAMPAIGN_PARAMS = {
-    "social_influencer": {"label":"Social Influencer","base_intent_alpha":3.5,"base_intent_beta":3.0,"engagement_multiplier":1.4,"city_bias":{"Milano":1.1,"Paris":1.2,"London":1.1,"New York":1.3,"Los Angeles":1.4,"Dubai":1.0,"Riyadh":0.9,"Tokyo":1.2,"Shanghai":1.1,"Singapore":1.0},"revenue_per_purchase":(800,5000)},
-    "digital_ar": {"label":"Digital AR Experience","base_intent_alpha":2.8,"base_intent_beta":3.5,"engagement_multiplier":1.6,"city_bias":{"Milano":1.0,"Paris":1.1,"London":1.2,"New York":1.3,"Los Angeles":1.5,"Dubai":1.1,"Riyadh":0.8,"Tokyo":1.4,"Shanghai":1.3,"Singapore":1.2},"revenue_per_purchase":(500,3000)},
-    "product_launch": {"label":"Product Launch","base_intent_alpha":4.0,"base_intent_beta":2.5,"engagement_multiplier":1.2,"city_bias":{"Milano":1.3,"Paris":1.4,"London":1.2,"New York":1.2,"Los Angeles":1.1,"Dubai":1.3,"Riyadh":1.1,"Tokyo":1.1,"Shanghai":1.2,"Singapore":1.0},"revenue_per_purchase":(2000,15000)},
-    "pricing_hike": {"label":"Pricing Strategy","base_intent_alpha":2.0,"base_intent_beta":4.0,"engagement_multiplier":0.8,"city_bias":{"Milano":1.2,"Paris":1.3,"London":1.1,"New York":1.0,"Los Angeles":0.9,"Dubai":1.4,"Riyadh":1.3,"Tokyo":1.0,"Shanghai":1.1,"Singapore":1.0},"revenue_per_purchase":(5000,50000)},
-    "heritage_campaign": {"label":"Heritage Campaign","base_intent_alpha":3.8,"base_intent_beta":2.8,"engagement_multiplier":1.1,"city_bias":{"Milano":1.4,"Paris":1.5,"London":1.3,"New York":1.1,"Los Angeles":1.0,"Dubai":1.1,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.1,"Singapore":1.0},"revenue_per_purchase":(3000,20000)},
-    "sustainability": {"label":"Sustainability Initiative","base_intent_alpha":3.2,"base_intent_beta":3.2,"engagement_multiplier":1.3,"city_bias":{"Milano":1.2,"Paris":1.3,"London":1.4,"New York":1.3,"Los Angeles":1.3,"Dubai":0.9,"Riyadh":0.8,"Tokyo":1.1,"Shanghai":1.0,"Singapore":1.1},"revenue_per_purchase":(1000,8000)},
-    "private_client_event": {"label":"Private Client Event","base_intent_alpha":5.0,"base_intent_beta":2.5,"engagement_multiplier":1.1,"city_bias":{"Milano":1.20,"Dubai":1.35,"Paris":1.25,"Tokyo":1.15,"New York":1.30,"London":1.22,"Riyadh":1.40,"Singapore":1.18,"Los Angeles":1.15,"Shanghai":1.12},"revenue_per_purchase":(20000,120000)},
+    "social_influencer": {"label":"Social Influencer","base_intent_alpha":3.5,"base_intent_beta":3.0,"engagement_multiplier":1.4,"revenue_per_purchase":(800,5000)},
+    "digital_ar": {"label":"Digital AR Experience","base_intent_alpha":2.8,"base_intent_beta":3.5,"engagement_multiplier":1.6,"revenue_per_purchase":(500,3000)},
+    "product_launch": {"label":"Product Launch","base_intent_alpha":4.0,"base_intent_beta":2.5,"engagement_multiplier":1.2,"revenue_per_purchase":(2000,15000)},
+    "pricing_hike": {"label":"Pricing Strategy","base_intent_alpha":2.0,"base_intent_beta":4.0,"engagement_multiplier":0.8,"revenue_per_purchase":(5000,50000)},
+    "heritage_campaign": {"label":"Heritage Campaign","base_intent_alpha":3.8,"base_intent_beta":2.8,"engagement_multiplier":1.1,"revenue_per_purchase":(3000,20000)},
+    "sustainability": {"label":"Sustainability Initiative","base_intent_alpha":3.2,"base_intent_beta":3.2,"engagement_multiplier":1.3,"revenue_per_purchase":(1000,8000)},
+    "private_client_event": {"label":"Private Client Event","base_intent_alpha":5.0,"base_intent_beta":2.5,"engagement_multiplier":1.1,"revenue_per_purchase":(20000,120000)},
 }
 
 ALL_CITIES = ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"]
