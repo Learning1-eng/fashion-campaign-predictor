@@ -142,7 +142,7 @@ def make_charts(df, city_summary):
     return fig
 
 LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress%20for%20good%20logo%20copy.png"
-st.markdown('<style>input[type="range"]{-webkit-appearance:none!important;appearance:none!important;accent-color:#111111!important;background:transparent!important;}input[type="range"]::-webkit-slider-runnable-track{-webkit-appearance:none!important;background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;}input[type="range"]::-moz-range-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;}input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none!important;appearance:none!important;background:#C8D400!important;width:18px!important;height:18px!important;border-radius:50%!important;margin-top:-8px!important;cursor:pointer!important;border:2px solid #C8D400!important;}input[type="range"]::-moz-range-thumb{background:#C8D400!important;width:16px!important;height:16px!important;border-radius:50%!important;border:2px solid #C8D400!important;}[data-baseweb="tab-highlight"]{background-color:#111111!important;height:3px!important;}[data-baseweb="tab-border"]{background-color:#E8E8E4!important;}[data-baseweb="multi-select"]{flex-wrap:wrap!important;padding:4px!important;}[data-baseweb="tag"]{max-width:none!important;overflow:visible!important;}</style>', unsafe_allow_html=True)
+st.markdown('<style>:root{--primary-color:#111111!important;}input[type=range]{accent-color:#111111!important;-webkit-appearance:none!important;appearance:none!important;background:transparent!important;}input[type=range]:focus{outline:none!important;}input[type=range]::-webkit-slider-runnable-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;-webkit-appearance:none!important;}input[type=range]::-moz-range-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;}input[type=range]::-ms-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none!important;appearance:none!important;background:#C8D400!important;width:18px!important;height:18px!important;border-radius:50%!important;margin-top:-8px!important;cursor:pointer!important;border:none!important;}input[type=range]::-moz-range-thumb{background:#C8D400!important;width:16px!important;height:16px!important;border-radius:50%!important;border:none!important;cursor:pointer!important;}[data-baseweb=tab-highlight]{background-color:#111111!important;}[data-baseweb=tab-border]{background-color:#E8E8E4!important;}</style>', unsafe_allow_html=True)
 
 with st.sidebar:
     try:
@@ -161,8 +161,7 @@ with st.sidebar:
         logo_data = base64.b64encode(uploaded_logo.read()).decode()
         st.markdown(f'<div style="text-align:center;padding:.3rem 0 .6rem;"><img src="data:image/png;base64,{logo_data}" style="max-width:120px;max-height:50px;object-fit:contain;"></div>', unsafe_allow_html=True)
     st.markdown('<hr style="border-color:#333;margin:.5rem 0 .8rem;">', unsafe_allow_html=True)
-    campaign_type = st.selectbox("Campaign Type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
-    n_vics = st.slider("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500)
+    n_vics = st.number_input("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500)
     cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5])
     if not cities: cities = ALL_CITIES[:3]
     budget = st.number_input("Campaign Budget (EUR)",min_value=50000,max_value=20000000,value=500000,step=50000)
@@ -187,6 +186,8 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7 = st.tabs([
 ])
 
 with tab1:
+    campaign_type = st.selectbox("Campaign type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
+    st.markdown("<br>",unsafe_allow_html=True)
     if not run:
         st.markdown("<div style='text-align:center;padding:4rem 2rem;'><span style='font-family:Montserrat,sans-serif;font-size:1.1rem;font-weight:500;color:#111;'>Configure parameters in the sidebar and run the simulation</span></div>", unsafe_allow_html=True)
     else:
@@ -255,7 +256,7 @@ with tab2:
     st.markdown("<p style='color:#111;font-size:.9rem;margin-bottom:1.5rem;'>Test creative concepts against synthetic VIC panels before campaign launch. Compare visual, copy, and format variants.</p>",unsafe_allow_html=True)
     rng2 = np.random.default_rng(99)
     concepts = st.text_area("Enter creative concepts (one per line)", "Heritage storytelling\nProduct close-up\nLifestyle aspiration\nCelebrity endorsement", height=100)
-    panel_size = st.slider("VIC panel size", 200, 5000, 1000, 100, key="ct_panel")
+    panel_size = st.number_input("VIC panel size", 200, 5000, 1000, 100, key="ct_panel")
     if st.button("Test Concepts", key="ct_run"):
         concept_list = [c.strip() for c in concepts.split("\n") if c.strip()]
         results = []
@@ -296,7 +297,7 @@ with tab3:
         launch_cities = st.multiselect("Launch markets", ALL_CITIES, ALL_CITIES[:3], key="pl_cities")
     with pl_col2:
         exclusivity = st.select_slider("Exclusivity level", ["Mass","Premium","Luxury","Ultra-Luxury"], "Luxury")
-        launch_window = st.slider("Launch window (weeks)", 1, 12, 4, key="pl_weeks")
+        launch_window = st.number_input("Launch window (weeks)", 1, 12, 4, key="pl_weeks")
         marketing_budget = st.number_input("Marketing budget (EUR)", 50000, 5000000, 200000, 50000, key="pl_budget")
     if st.button("Simulate Launch", key="pl_run"):
         excl_map = {"Mass":0.6,"Premium":0.8,"Luxury":1.0,"Ultra-Luxury":1.2}
@@ -330,7 +331,12 @@ with tab4:
     po_col1, po_col2 = st.columns(2)
     with po_col1:
         current_price = st.number_input("Current price (EUR)", 500, 100000, 3000, 500, key="po_price")
-        price_range = st.slider("Price range to test", 0.5, 2.0, (0.7, 1.5), 0.1, key="po_range")
+        pr_col1, pr_col2 = st.columns(2)
+        with pr_col1:
+            price_min = st.number_input("Price multiplier min", min_value=0.5, max_value=1.5, value=0.7, step=0.1, key="po_min")
+        with pr_col2:
+            price_max = st.number_input("Price multiplier max", min_value=0.6, max_value=2.0, value=1.5, step=0.1, key="po_max")
+        price_range = (price_min, price_max)
     with po_col2:
         segment = st.selectbox("VIC segment", ["All segments","Ultra-HNWI Collector","Private Client","Aspirational Buyer"], key="po_seg")
         po_cities = st.multiselect("Markets", ALL_CITIES, ALL_CITIES[:3], key="po_cities")
@@ -390,10 +396,10 @@ with tab6:
     ch_col1, ch_col2 = st.columns(2)
     with ch_col1:
         ch_cities = st.multiselect("Markets", ALL_CITIES, ALL_CITIES[:4], key="ch_cities")
-        ch_threshold = st.slider("Churn risk threshold (%)", 30, 80, 50, 5, key="ch_threshold")
+        ch_threshold = st.number_input("Churn risk threshold (%)", 30, 80, 50, 5, key="ch_threshold")
     with ch_col2:
-        recency_weight = st.slider("Recency weight", 0.1, 1.0, 0.5, 0.1, key="ch_recency")
-        engagement_weight = st.slider("Engagement weight", 0.1, 1.0, 0.5, 0.1, key="ch_eng")
+        recency_weight = st.number_input("Recency weight", 0.1, 1.0, 0.5, 0.1, key="ch_recency")
+        engagement_weight = st.number_input("Engagement weight", 0.1, 1.0, 0.5, 0.1, key="ch_eng")
     if st.button("Predict Churn", key="ch_run"):
         rng_ch = np.random.default_rng(55)
         ch_data = []
