@@ -285,9 +285,9 @@ with tab1:
         region = st.selectbox("Target region", list(REGION_MAP.keys()), key="region_tab1")
         cities = REGION_MAP[region]
     with ct_col3:
-        n_vics = st.selectbox("VIC Pool Size", [1000,2000,5000,10000,20000,50000], index=2, key="n_vics_tab1")
+        n_vics = st.number_input("VIC Pool Size", min_value=500, max_value=50000, value=5000, step=500, key="n_vics_tab1")
     with ct_col4:
-        budget = st.selectbox("Budget (EUR)", [50000,100000,250000,500000,1000000,2000000,5000000], index=3, format_func=lambda x:f"EUR {x:,.0f}", key="budget_tab1")
+        budget = st.number_input("Budget (EUR)", min_value=50000, max_value=20000000, value=500000, step=50000, key="budget_tab1")
     st.markdown("<br>",unsafe_allow_html=True)
     if st.button("Run Simulation", key="run_tab1"):
         _bp1 = st.session_state.get("brand_profile") or {}
