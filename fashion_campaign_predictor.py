@@ -278,16 +278,14 @@ with tab1:
         "Asia Pacific":   ["Tokyo","Shanghai","Singapore"],
         "Americas":       ["New York","Los Angeles"],
     }
-    ct_col1, ct_col2, ct_col3, ct_col4 = st.columns([1.4,1,1,1])
+    ct_col1, ct_col2 = st.columns([1.4,1])
     with ct_col1:
         campaign_type = st.selectbox("Campaign type", options=list(CAMPAIGN_PARAMS.keys()), format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
     with ct_col2:
         region = st.selectbox("Target region", list(REGION_MAP.keys()), key="region_tab1")
         cities = REGION_MAP[region]
-    with ct_col3:
-        n_vics = st.number_input("VIC Pool Size", min_value=500, max_value=50000, value=5000, step=500, key="n_vics_tab1")
-    with ct_col4:
-        budget = st.number_input("Budget (EUR)", min_value=50000, max_value=20000000, value=500000, step=50000, key="budget_tab1")
+    n_vics = st.slider("VIC Pool Size", min_value=500, max_value=50000, value=5000, step=500, key="n_vics_tab1")
+    budget = st.slider("Budget (EUR)", min_value=50000, max_value=5000000, value=500000, step=50000, key="budget_tab1")
     st.markdown("<br>",unsafe_allow_html=True)
     if st.button("Run Simulation", key="run_tab1"):
         _bp1 = st.session_state.get("brand_profile") or {}
