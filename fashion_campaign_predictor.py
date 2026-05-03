@@ -151,20 +151,25 @@ with st.sidebar:
         logo_data = base64.b64encode(uploaded_logo.read()).decode()
         st.markdown(f'<div style="text-align:center;padding:.3rem 0 .6rem;"><img src="data:image/png;base64,{logo_data}" style="max-width:120px;max-height:50px;object-fit:contain;"></div>', unsafe_allow_html=True)
     st.markdown('<hr style="border-color:#333;margin:.5rem 0 .8rem;">', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:.4rem;">Brand</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:.4rem;">Type a brand</div>', unsafe_allow_html=True)
     BRAND_PROFILES = {
-        "Generic Luxury": {"ego_override": None, "rd_default": "Established", "color": "#888", "note": "Neutral benchmark"},
         "Gucci":          {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.55,"Adult":0.25,"Child":0.20},"Aspirational Buyer":{"Parent":0.15,"Adult":0.25,"Child":0.60},"Heritage Loyalist":{"Parent":0.60,"Adult":0.30,"Child":0.10}}, "rd_default": "Established", "color": "#C8D400", "note": "Post-reset — anti-vanilla, clivant (De Meo Axiome XI)"},
         "Bottega Veneta": {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.75,"Adult":0.20,"Child":0.05},"Private Client":{"Parent":0.30,"Adult":0.65,"Child":0.05},"Heritage Loyalist":{"Parent":0.80,"Adult":0.15,"Child":0.05}}, "rd_default": "Legacy", "color": "#111", "note": "Parent-dominant — Legacy depth, stealth positioning"},
         "Saint Laurent":  {"ego_override": {"Trend Setter":{"Parent":0.10,"Adult":0.30,"Child":0.60},"Digital Native HNWI":{"Parent":0.10,"Adult":0.35,"Child":0.55},"Aspirational Buyer":{"Parent":0.10,"Adult":0.20,"Child":0.70}}, "rd_default": "New", "color": "#555", "note": "Child-dominant — FOMO-sensitive, cultural capital"},
         "Balenciaga":     {"ego_override": {"Digital Native HNWI":{"Parent":0.05,"Adult":0.35,"Child":0.60},"Trend Setter":{"Parent":0.05,"Adult":0.25,"Child":0.70},"Aspirational Buyer":{"Parent":0.10,"Adult":0.20,"Child":0.70}}, "rd_default": "New", "color": "#111", "note": "Gen Z anchor — 7 territories (De Meo Axiome VIII)"},
         "Loro Piana":     {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.80,"Adult":0.15,"Child":0.05},"Private Client":{"Parent":0.40,"Adult":0.55,"Child":0.05},"Heritage Loyalist":{"Parent":0.85,"Adult":0.12,"Child":0.03}}, "rd_default": "Legacy", "color": "#888", "note": "Ultra Parent-dominant — stealth luxury, anti-trigger"},
     }
-    selected_brand = st.selectbox("Brand", list(BRAND_PROFILES.keys()), key="selected_brand", label_visibility="collapsed")
-    brand_profile = BRAND_PROFILES[selected_brand]
-    st.markdown(f'<div style="font-size:.62rem;color:#999;line-height:1.5;margin-bottom:.6rem;">{brand_profile["note"]}</div>', unsafe_allow_html=True)
-    st.session_state["brand_profile"] = brand_profile
-    st.session_state["selected_brand"] = selected_brand
+    typed_brand = st.text_input("", placeholder="e.g. Hermès, Chanel, Dior...", key="typed_brand", label_visibility="collapsed")
+    selected_brand = typed_brand.strip() if typed_brand.strip() else "Generic Luxury"
+    brand_profile = BRAND_PROFILES.get(selected_brand, {"ego_override": None, "rd_default": "Established", "color": "#888", "note": "Custom brand — synthetic baseline applied"})
+    if typed_brand.strip():
+        calibrated = typed_brand.strip() in BRAND_PROFILES
+        note_color = "#C8D400" if calibrated else "#888"
+        note_text = brand_profile["note"] if calibrated else f"Custom brand — synthetic baseline. Pre-calibrated: {', '.join(BRAND_PROFILES.keys())}"
+        st.markdown(f'<div style="font-size:.58rem;color:{note_color};line-height:1.5;margin-bottom:.6rem;">{note_text}</div>', unsafe_allow_html=True)
+    if "brand_profile" not in st.session_state or st.session_state.get("_last_brand") != selected_brand:
+        st.session_state["brand_profile"] = brand_profile
+        st.session_state["_last_brand"] = selected_brand
     st.markdown('<hr style="border-color:#333;margin:.5rem 0 .8rem;">', unsafe_allow_html=True)
     n_vics = st.number_input("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500)
     cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5])
@@ -439,8 +444,8 @@ with tab7:
         st.dataframe(city_df.style.format(fmt_bp),use_container_width=True,hide_index=True)
 
 with tab8:
-    _selected_brand = st.session_state.get("selected_brand", "Generic Luxury")
-    _brand_color = st.session_state.get("brand_profile", {}).get("color", "#111")
+    _selected_brand = st.session_state.get("_last_brand", "")
+    _brand_color = st.session_state.get("brand_profile", {}).get("color", "#888")
     st.markdown(
         f"<div class='section-label'>VIC Psychographic Engine — TACLA Architecture v3 &nbsp;·&nbsp; "
         f"<span style='color:{_brand_color};'>{_selected_brand}</span></div>",
@@ -613,7 +618,7 @@ with tab8:
 
         # 0. Brand-specific ego override (if brand selected in sidebar)
         import streamlit as _st
-        _bp = _st.session_state.get("brand_profile", {})
+        _bp = _st.session_state.get("brand_profile") or {}
         _override = _bp.get("ego_override", None)
         if _override and persona_name in _override:
             _ov = _override[persona_name]
