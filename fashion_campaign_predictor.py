@@ -117,6 +117,10 @@ div[data-testid='stSidebar'] .stSelectbox label,
 div[data-testid='stSidebar'] .stMultiSelect label,
 div[data-testid='stSidebar'] .stNumberInput label{color:#999!important;font-size:.55rem!important;letter-spacing:.1em!important;text-transform:uppercase!important;}
 div[data-testid='stSidebar'] .stButton>button{background:#C8D400!important;color:#111!important;font-weight:700!important;}
+div[data-testid='stSidebar'] [data-testid="stNumberInput"] button{background:#333!important;color:#fff!important;border:none!important;}
+div[data-testid='stSidebar'] [data-testid="stNumberInput"] button:hover{background:#C8D400!important;color:#111!important;}
+div[data-testid='stSidebar'] [data-testid="stNumberInput"] button svg{fill:#fff!important;}
+div[data-testid='stSidebar'] [data-testid="stNumberInput"] button:hover svg{fill:#111!important;}
 .stButton>button{background:#111!important;color:#fff!important;border:1px solid #111!important;border-radius:0!important;font-family:Montserrat,sans-serif!important;font-size:.6rem!important;font-weight:700!important;letter-spacing:.2em!important;text-transform:uppercase!important;padding:.85rem 2rem!important;width:100%!important;}
 .stButton>button:hover{background:#C8D400!important;border-color:#C8D400!important;color:#111!important;}
 button[data-testid="baseButton-secondary"]{background:#111!important;color:#fff!important;border:1px solid #111!important;border-radius:0!important;}
@@ -182,18 +186,19 @@ def run_simulation(campaign_type, n_vics, cities, budget, seed=42):
         alpha = cp["base_intent_alpha"] * p_intent[pi] * cf * budget_factor
         beta = cp["base_intent_beta"] / (p_intent[pi] * cf)
         intent = float(np.clip(rng.beta(alpha, beta), 0, 1))
-        engagement = float(np.clip(rng.beta(3.0 * p_eng[pi], 3.5) * cp["engagement_multiplier"], 0, 1))
-        purchase = bool(rng.random() < intent)
-        rev_min, rev_max = cp["revenue_per_purchase"]
-        revenue = float(rng.uniform(rev_min, rev_max)) if purchase else 0.0
-        agents.append({"city": city, "persona": persona_names[pi], "intent": intent, "engagement": engagement, "purchase": purchase, "revenue": revenue})
+        engagement = float(np.clip(rng.beta(3.0*p_eng[pi], 3.5) * cp["engagement_multiplier"] * cf * budget_factor, 0, 1))
+        purchased = bool(rng.random() < intent)
+        rev_lo, rev_hi = cp["revenue_per_purchase"]
+        revenue = float(rng.uniform(rev_lo, rev_hi)) if purchased else 0.0
+        influence = float(np.clip(rng.beta(2.0, 5.0) * 100000, 500, 100000))
+        agents.append({"VIC ID": f"VIC-{i+1:05d}", "Persona": persona_names[pi], "City": city,
+            "Purchase Intent": round(intent*100,1), "Engagement": round(engagement*100,1),
+            "Purchased": purchased, "Revenue (EUR)": round(revenue,0), "Influence Score": round(influence,0)})
     df = pd.DataFrame(agents)
-    scale = n_vics / n_sim
-    total_revenue = df["revenue"].sum() * scale
-    buy_rate = df["purchase"].mean() * 100
-    avg_engagement = df["engagement"].mean() * 100
-    roi = (total_revenue - budget) / budget * 100
-    return df, total_revenue, buy_rate, avg_engagement, roi, scale
+    if n_vics < n_sim:
+        df = df.sample(n=n_vics, random_state=seed).reset_index(drop=True)
+        df["VIC ID"] = [f"VIC-{i+1:05d}" for i in range(len(df))]
+    return df
 
 with st.sidebar:
     try:
@@ -245,15 +250,14 @@ with st.sidebar:
     if "brand_profile" not in st.session_state or st.session_state.get("_last_brand") != selected_brand:
         st.session_state["brand_profile"] = brand_profile
         st.session_state["_last_brand"] = selected_brand
-    st.markdown('<hr style="border-color:#333;margin:.5rem 0 .8rem;">', unsafe_allow_html=True)
-    n_vics = st.number_input("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500)
-    cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5])
-    if not cities: cities = ALL_CITIES[:3]
-    budget = st.number_input("Campaign Budget (EUR)",min_value=50000,max_value=20000000,value=500000,step=50000)
     st.markdown('<hr style="border-color:#333;margin:1rem 0;">', unsafe_allow_html=True)
-    run = st.button("Run simulation")
     st.markdown('<div style="margin-top:1.5rem;text-align:center;font-size:.65rem;font-weight:600;color:#555;letter-spacing:.1em;text-transform:uppercase;">Dress for Good</div>', unsafe_allow_html=True)
 
+
+# Global defaults (overridden inside tab1)
+if "n_vics" not in st.session_state: st.session_state["n_vics"] = 5000
+if "cities" not in st.session_state: st.session_state["cities"] = ALL_CITIES[:5]
+if "budget" not in st.session_state: st.session_state["budget"] = 500000
 
 tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
     "Campaign Simulator",
@@ -267,13 +271,21 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
 ])
 
 with tab1:
-    campaign_type = st.selectbox("Campaign type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
+    ct_col1, ct_col2, ct_col3 = st.columns(3)
+    with ct_col1:
+        campaign_type = st.selectbox("Campaign type",options=list(CAMPAIGN_PARAMS.keys()),format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
+    with ct_col2:
+        n_vics = st.number_input("VIC Pool Size",min_value=500,max_value=50000,value=5000,step=500,key="n_vics_tab1")
+        cities = st.multiselect("Target Cities",options=ALL_CITIES,default=ALL_CITIES[:5],key="cities_tab1")
+        if not cities: cities = ALL_CITIES[:3]
+    with ct_col3:
+        budget = st.number_input("Campaign Budget (EUR)",min_value=50000,max_value=20000000,value=500000,step=50000,key="budget_tab1")
     st.markdown("<br>",unsafe_allow_html=True)
-    if not run:
-        st.markdown("<div style='text-align:center;padding:4rem 2rem;'><span style='font-family:Montserrat,sans-serif;font-size:1.1rem;font-weight:500;color:#111;'>Configure parameters in the sidebar and run the simulation</span></div>", unsafe_allow_html=True)
-    else:
+    if st.button("Run Simulation", key="run_tab1"):
+        _bp1 = st.session_state.get("brand_profile") or {}
+        _brand_seed = hash(st.session_state.get("_last_brand","")) % 10000
         with st.spinner("Running simulation..."):
-            df = run_simulation(campaign_type, n_vics, cities, budget)
+            df = run_simulation(campaign_type, n_vics, cities, budget, seed=42+_brand_seed)
             summary = compute_summary(df, budget)
         c1,c2,c3,c4,c5 = st.columns(5)
         kpis = [
@@ -311,6 +323,11 @@ with tab1:
             st.download_button("Export CSV",data=csv_buf.getvalue(),file_name=f"campaign_{campaign_type}.csv",mime="text/csv")
         with col_xl:
             st.download_button("Export Excel",data=exc_buf.read(),file_name=f"campaign_{campaign_type}.xlsx",mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        _brand_name1 = st.session_state.get("_last_brand","")
+        _brand_note1 = (st.session_state.get("brand_profile") or {}).get("note","")
+        if _brand_name1 and _brand_name1 != "Generic Luxury":
+            st.markdown(f"<div style='padding:.5rem 1rem;margin-bottom:.8rem;border-left:3px solid #C8D400;font-size:.78rem;color:#111;'>"
+                f"<strong>{_brand_name1}</strong> — {_brand_note1}</div>", unsafe_allow_html=True)
         top_city = summary["city_summary"].iloc[0]["City"]
         top_persona = summary["persona_summary"].iloc[0]["Persona"]
         roi_read = "strong positive" if summary["roi"]>50 else "moderate" if summary["roi"]>0 else "negative"
@@ -445,7 +462,10 @@ with tab5:
             for persona, share, intent, eng in VIC_PERSONAS:
                 cf = CAMPAIGN_PARAMS[ms_campaign]["city_bias"].get(city, 1.0)
                 vic_count = round(share * 1000 * cf * rng_ms.uniform(0.85, 1.15))
-                buy_r = round(intent * cf * rng_ms.uniform(0.8, 1.2) * 100, 1)
+                _bp5 = st.session_state.get("brand_profile") or {}
+                _ov5 = (_bp5.get("ego_override") or {}).get(persona, None)
+                _brand_boost = 1.15 if _ov5 else 1.0
+                buy_r = round(intent * cf * rng_ms.uniform(0.8, 1.2) * _brand_boost * 100, 1)
                 ms_data.append({"City": city, "Persona": persona, "VIC Count": vic_count, "Buy Rate (%)": buy_r, "Engagement (%)": round(eng * cf * 100, 1)})
         ms_df = pd.DataFrame(ms_data)
         pivot = ms_df.pivot_table(index="Persona", columns="City", values="Buy Rate (%)", aggfunc="mean").round(1)
@@ -490,7 +510,10 @@ with tab6:
             persona = VIC_PERSONAS[rng_ch.integers(0, len(VIC_PERSONAS))][0]
             recency = rng_ch.integers(1, 365)
             eng_score = round(rng_ch.beta(3,4)*100, 1)
-            churn_prob = min(100, recency_weight*(recency/365*100) + engagement_weight*(100-eng_score) + rng_ch.normal(0,5))
+            _bp6 = st.session_state.get("brand_profile") or {}
+            _rd6 = _bp6.get("rd_default","Established")
+            _churn_mod = -8 if _rd6=="Legacy" else 5 if _rd6=="New" else 0
+            churn_prob = min(100, recency_weight*(recency/365*100) + engagement_weight*(100-eng_score) + rng_ch.normal(0,5) + _churn_mod)
             ltv = round(rng_ch.uniform(2000, 50000), 0)
             ch_data.append({"City":city,"Persona":persona,"Days since purchase":recency,"Engagement (%)":eng_score,"Churn risk (%)":round(churn_prob,1),"LTV (EUR)":ltv})
         ch_df = pd.DataFrame(ch_data)
@@ -518,7 +541,9 @@ with tab7:
     st.markdown("<p style='color:#111;font-size:.9rem;margin-bottom:1.5rem;'>Track brand equity dimensions across VIC segments and markets. Benchmark desirability, exclusivity, heritage, and innovation scores.</p>",unsafe_allow_html=True)
     bp_col1, bp_col2 = st.columns(2)
     with bp_col1:
-        bp_brand = st.text_input("Brand name", "Your Brand")
+        _sb7 = st.session_state.get("_last_brand","")
+        _default_brand7 = _sb7 if _sb7 and _sb7 != "Generic Luxury" else "Your Brand"
+        bp_brand = st.text_input("Brand name", _default_brand7)
         bp_cities = st.multiselect("Markets", ALL_CITIES, ALL_CITIES[:5], key="bp_cities")
     with bp_col2:
         bp_segment = st.multiselect("VIC segments", [p[0] for p in VIC_PERSONAS], [p[0] for p in VIC_PERSONAS[:4]], key="bp_seg")
