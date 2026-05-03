@@ -182,7 +182,11 @@ def run_simulation(campaign_type, n_vics, cities, budget, seed=42):
     budget_factor = min(1.0 + (budget / 2000000) * 0.3, 1.35)
     agents = []
     for i in range(n_sim):
-        city = assigned_cities[i]; cf = cp["city_bias"].get(city, 1.0); pi = assigned_personas[i]
+        city = assigned_cities[i]
+        cf = cp["city_bias"].get(city, 1.0)
+        if brand_city_bias:
+            cf = cf * brand_city_bias.get(city, 1.0)
+        pi = assigned_personas[i]
         alpha = cp["base_intent_alpha"] * p_intent[pi] * cf * budget_factor
         beta = cp["base_intent_beta"] / (p_intent[pi] * cf)
         intent = float(np.clip(rng.beta(alpha, beta), 0, 1))
