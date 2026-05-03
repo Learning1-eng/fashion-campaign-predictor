@@ -56,6 +56,44 @@ if not st.session_state.authenticated:
         st.markdown('<div style="margin-top:1.5rem;font-size:.55rem;color:#ccc;letter-spacing:.05em;">Powered by synthetic VIC agent modeling</div>', unsafe_allow_html=True)
     st.stop()
 
+def compute_summary(df, budget):
+    total = len(df); buyers = int(df["Purchased"].sum())
+    buy_rate = buyers/total*100; total_revenue = df["Revenue (EUR)"].sum()
+    roi = (total_revenue-budget)/budget*100 if budget>0 else 0
+    city_s = df.groupby("City").agg(VICs=("VIC ID","count"),Buyers=("Purchased","sum"),Avg_Intent=("Purchase Intent","mean"),Revenue=("Revenue (EUR)","sum")).reset_index()
+    city_s["Buy Rate (%)"] = (city_s["Buyers"]/city_s["VICs"]*100).round(1)
+    city_s["Revenue (EUR)"] = city_s["Revenue"].round(0)
+    city_s["Avg Intent (%)"] = city_s["Avg_Intent"].round(1)
+    city_s = city_s[["City","VICs","Buyers","Buy Rate (%)","Avg Intent (%)","Revenue (EUR)"]].sort_values("Revenue (EUR)",ascending=False)
+    pers_s = df.groupby("Persona").agg(Count=("VIC ID","count"),Buyers=("Purchased","sum"),Avg_Intent=("Purchase Intent","mean"),Revenue=("Revenue (EUR)","sum")).reset_index()
+    pers_s["Buy Rate (%)"] = (pers_s["Buyers"]/pers_s["Count"]*100).round(1)
+    pers_s["Revenue (EUR)"] = pers_s["Revenue"].round(0)
+    pers_s["Avg Intent (%)"] = pers_s["Avg_Intent"].round(1)
+    pers_s = pers_s[["Persona","Count","Buy Rate (%)","Avg Intent (%)","Revenue (EUR)"]].sort_values("Revenue (EUR)",ascending=False)
+    return {"total":total,"buyers":buyers,"buy_rate":round(buy_rate,1),"total_revenue":round(total_revenue,0),"roi":round(roi,1),"total_reach":int(df["Influence Score"].sum()) if "Influence Score" in df.columns else 0,"city_summary":city_s,"persona_summary":pers_s}
+
+def make_charts(df, city_summary):
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    font = dict(family="Montserrat, sans-serif", color="#111111")
+    layout_base = dict(paper_bgcolor="#fff", plot_bgcolor="#fff", font=font,
+        margin=dict(l=10,r=10,t=35,b=10))
+    fig = make_subplots(rows=1, cols=3, column_widths=[0.28,0.44,0.28],
+        subplot_titles=["Buy rate by city","Purchase intent distribution","Revenue by city (kEUR)"])
+    clrs = ["#111111" if i==0 else "#CCCCCC" for i in range(len(city_summary))]
+    fig.add_trace(go.Bar(x=city_summary["City"], y=city_summary["Buy Rate (%)"], marker_color=clrs, showlegend=False), row=1, col=1)
+    fig.add_trace(go.Histogram(x=df.loc[~df["Purchased"],"Purchase Intent"], name="No Purchase", marker_color="#E8E8E4", opacity=0.9, nbinsx=25), row=1, col=2)
+    fig.add_trace(go.Histogram(x=df.loc[df["Purchased"],"Purchase Intent"], name="Purchased", marker_color="#111111", opacity=0.85, nbinsx=25), row=1, col=2)
+    top = city_summary.sort_values("Revenue (EUR)")
+    clrs3 = ["#C8D400" if i==len(top)-1 else "#CCCCCC" for i in range(len(top))]
+    fig.add_trace(go.Bar(y=top["City"], x=top["Revenue (EUR)"]/1000, orientation="h", marker_color=clrs3, showlegend=False), row=1, col=3)
+    fig.update_layout(**layout_base, height=250, legend=dict(bgcolor="#fff",bordercolor="#E8E8E4",font=dict(family="Montserrat",size=9)))
+    fig.update_xaxes(showgrid=True,gridcolor="#E8E8E4",linecolor="#E8E8E4",tickfont=dict(size=8,color="#111"))
+    fig.update_yaxes(showgrid=True,gridcolor="#E8E8E4",linecolor="#E8E8E4",tickfont=dict(size=8,color="#111"))
+    for ann in fig.layout.annotations: ann.font.size=9; ann.font.family="Montserrat, sans-serif"; ann.font.color="#111111"
+    return fig
+
+
 LOGO_URL = "https://raw.githubusercontent.com/Learning1-eng/fashion-campaign-predictor/main/dress%20for%20good%20logo%20copy.png"
 st.markdown('<style>:root{--primary-color:#111111!important;}input[type=range]{accent-color:#111111!important;-webkit-appearance:none!important;appearance:none!important;background:transparent!important;}input[type=range]:focus{outline:none!important;}input[type=range]::-webkit-slider-runnable-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;-webkit-appearance:none!important;}input[type=range]::-moz-range-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;}input[type=range]::-ms-track{background:#111111!important;height:3px!important;border-radius:2px!important;border:none!important;}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none!important;appearance:none!important;background:#C8D400!important;width:18px!important;height:18px!important;border-radius:50%!important;margin-top:-8px!important;cursor:pointer!important;border:none!important;}input[type=range]::-moz-range-thumb{background:#C8D400!important;width:16px!important;height:16px!important;border-radius:50%!important;border:none!important;cursor:pointer!important;}[data-baseweb=tab-highlight]{background-color:#111111!important;}[data-baseweb=tab-border]{background-color:#E8E8E4!important;}</style>', unsafe_allow_html=True)
 
@@ -63,13 +101,9 @@ css = """
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap');
 html,body,[class*='css']{font-family:Montserrat,sans-serif;background:#FAFAF8;color:#111;}
 .stApp{background:#FAFAF8;}
-:root{--primary-color:#111111!important;--secondary-background-color:#F5F5F3!important;}
-button{background:#111!important;color:#fff!important;border:none!important;}
-*[class*="red"],*[style*="rgb(255"],*[style*="#ff"],*[style*="#FF"]{color:#111!important;background:#111!important;}
-[data-testid="stNumberInput"] button{background:#111!important;color:#fff!important;border:none!important;border-radius:0!important;}
-[data-testid="stNumberInput"] button:hover{background:#C8D400!important;color:#111!important;}
-[data-testid="stNumberInput"] button svg{fill:#fff!important;}
-[data-testid="stNumberInput"] button:hover svg{fill:#111!important;}
+:root{--primary-color:#111111!important;}
+button[data-testid="stNumberInput-StepUp"],button[data-testid="stNumberInput-StepDown"]{background:#111!important;color:#fff!important;border:none!important;}
+button[data-testid="stNumberInput-StepUp"]:hover,button[data-testid="stNumberInput-StepDown"]:hover{background:#C8D400!important;color:#111!important;}
 .stTabs [data-baseweb='tab-list']{background:#fff;border-bottom:1px solid #E8E8E4;gap:0;}
 .stTabs [data-baseweb='tab']{font-family:Montserrat,sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#888;padding:.7rem 1.2rem;border-radius:0;}
 .stTabs [aria-selected='true']{color:#111!important;}
@@ -238,37 +272,52 @@ with tab1:
     if not run:
         st.markdown("<div style='text-align:center;padding:4rem 2rem;'><span style='font-family:Montserrat,sans-serif;font-size:1.1rem;font-weight:500;color:#111;'>Configure parameters in the sidebar and run the simulation</span></div>", unsafe_allow_html=True)
     else:
-        df, total_revenue, buy_rate, avg_engagement, roi, scale = run_simulation(campaign_type, n_vics, cities, budget)
-        c1,c2,c3,c4 = st.columns(4)
-        with c1: st.markdown(f"<div class='metric-card'><div class='metric-value'>{buy_rate:.1f}%</div><div class='metric-label'>Buy Rate</div></div>",unsafe_allow_html=True)
-        with c2: st.markdown(f"<div class='metric-card'><div class='metric-value'>EUR {total_revenue/1000000:.2f}M</div><div class='metric-label'>Projected Revenue</div></div>",unsafe_allow_html=True)
-        with c3: st.markdown(f"<div class='metric-card'><div class='metric-value'>{avg_engagement:.1f}%</div><div class='metric-label'>Avg Engagement</div></div>",unsafe_allow_html=True)
-        with c4: st.markdown(f"<div class='metric-card'><div class='metric-value'>{roi:+.0f}%</div><div class='metric-label'>ROI</div></div>",unsafe_allow_html=True)
+        with st.spinner("Running simulation..."):
+            df = run_simulation(campaign_type, n_vics, cities, budget)
+            summary = compute_summary(df, budget)
+        c1,c2,c3,c4,c5 = st.columns(5)
+        kpis = [
+            (f'{summary["buy_rate"]}%',"Buy rate","Beta-dist. intent model"),
+            (f'{summary["buyers"]:,}',"Buyers","VICs with intent > threshold"),
+            (f'EUR {summary["total_revenue"]/1000000:.1f}M',"Revenue","Avg ticket x buyers"),
+            (f'{summary["roi"]:+.0f}%',"ROI","(Revenue - Budget) / Budget"),
+            (f'{summary["total_reach"]//1000000:.1f}M',"Reach","Sum influence scores"),
+        ]
+        for col,(val,label,note) in zip([c1,c2,c3,c4,c5],kpis):
+            with col:
+                st.markdown(f"<div class='metric-card'><div class='metric-value'>{val}</div><div class='metric-label'>{label}</div></div>",unsafe_allow_html=True)
         st.markdown("<br>",unsafe_allow_html=True)
-        city_df = df.groupby("city").agg(buy_rate=("purchase","mean"),avg_engagement=("engagement","mean"),count=("purchase","count")).reset_index()
-        city_df["buy_rate"] *= 100; city_df["avg_engagement"] *= 100
-        persona_df = df.groupby("persona").agg(buy_rate=("purchase","mean"),avg_engagement=("engagement","mean"),revenue=("revenue","sum")).reset_index()
-        persona_df["buy_rate"] *= 100; persona_df["avg_engagement"] *= 100; persona_df["revenue"] *= scale
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.markdown("<div class='section-label'>Buy Rate by City</div>",unsafe_allow_html=True)
-            fig1 = go.Figure(go.Bar(x=city_df["city"],y=city_df["buy_rate"],marker_color="#111",marker_line_width=0))
-            fig1.update_layout(paper_bgcolor="#fff",plot_bgcolor="#fff",height=260,margin=dict(l=10,r=10,t=10,b=10),font=dict(family="Montserrat",color="#111"))
-            fig1.update_xaxes(tickfont=dict(size=9,color="#111"),gridcolor="#E8E8E4")
-            fig1.update_yaxes(tickfont=dict(size=9,color="#111"),gridcolor="#E8E8E4",ticksuffix="%")
-            st.plotly_chart(fig1,use_container_width=True)
-        with col_b:
-            st.markdown("<div class='section-label'>Buy Rate by Persona</div>",unsafe_allow_html=True)
-            fig2 = go.Figure(go.Bar(x=persona_df["persona"],y=persona_df["buy_rate"],marker_color="#C8D400",marker_line_width=0))
-            fig2.update_layout(paper_bgcolor="#fff",plot_bgcolor="#fff",height=260,margin=dict(l=10,r=10,t=10,b=10),font=dict(family="Montserrat",color="#111"))
-            fig2.update_xaxes(tickfont=dict(size=8,color="#111"),gridcolor="#E8E8E4",tickangle=-30)
-            fig2.update_yaxes(tickfont=dict(size=9,color="#111"),gridcolor="#E8E8E4",ticksuffix="%")
-            st.plotly_chart(fig2,use_container_width=True)
-        st.markdown("<div class='section-label'>Results by City</div>",unsafe_allow_html=True)
-        fmt = {"buy_rate":"{:.1f}%","avg_engagement":"{:.1f}%","count":"{:,.0f}"}
-        st.dataframe(city_df.rename(columns={"city":"City","buy_rate":"Buy Rate","avg_engagement":"Engagement","count":"VICs Simulated"}).style.format({"Buy Rate":"{:.1f}%","Engagement":"{:.1f}%","VICs Simulated":"{:,.0f}"}),use_container_width=True,hide_index=True)
-        csv = df.to_csv(index=False).encode()
-        st.download_button("Download raw data CSV",csv,"vic_simulation.csv","text/csv")
+        fig = make_charts(df, summary["city_summary"])
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("<br>",unsafe_allow_html=True)
+        cl,cr = st.columns(2)
+        fmt = {"Buy Rate (%)":"{:.1f}","Revenue (EUR)":"EUR{:,.0f}","Avg Intent (%)":"{:.1f}"}
+        with cl:
+            st.markdown("<div class='section-label'>Performance by city</div>",unsafe_allow_html=True)
+            st.dataframe(summary["city_summary"].style.format(fmt),use_container_width=True,hide_index=True)
+        with cr:
+            st.markdown("<div class='section-label'>VIC persona intelligence</div>",unsafe_allow_html=True)
+            st.dataframe(summary["persona_summary"].style.format(fmt),use_container_width=True,hide_index=True)
+        st.markdown("<br>",unsafe_allow_html=True)
+        col_csv,col_xl = st.columns(2)
+        csv_buf = io.StringIO(); df.to_csv(csv_buf,index=False)
+        exc_buf = io.BytesIO()
+        with pd.ExcelWriter(exc_buf, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False, sheet_name="VIC Data")
+            summary["city_summary"].to_excel(writer, index=False, sheet_name="City Summary")
+            summary["persona_summary"].to_excel(writer, index=False, sheet_name="Persona Summary")
+        exc_buf.seek(0)
+        with col_csv:
+            st.download_button("Export CSV",data=csv_buf.getvalue(),file_name=f"campaign_{campaign_type}.csv",mime="text/csv")
+        with col_xl:
+            st.download_button("Export Excel",data=exc_buf.read(),file_name=f"campaign_{campaign_type}.xlsx",mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        top_city = summary["city_summary"].iloc[0]["City"]
+        top_persona = summary["persona_summary"].iloc[0]["Persona"]
+        roi_read = "strong positive" if summary["roi"]>50 else "moderate" if summary["roi"]>0 else "negative"
+        readout = (f"Simulation of {summary['total']:,} synthetic VIC agents across {', '.join(cities)} "
+                   f"projects a {roi_read} ROI of {summary['roi']:+.0f}% on a EUR{budget:,.0f} investment. "
+                   f"Conversion: {summary['buy_rate']}%. Top market: {top_city}. Dominant persona: {top_persona}.")
+        st.markdown(f"<div style='font-family:Montserrat;font-size:.88rem;font-weight:300;color:#111;line-height:1.9;padding:1rem 0 1rem 1.2rem;border-left:3px solid #C8D400;'>{readout}</div>",unsafe_allow_html=True)
 
 with tab2:
     st.markdown("<div class='section-label'>Creative Testing</div>",unsafe_allow_html=True)
