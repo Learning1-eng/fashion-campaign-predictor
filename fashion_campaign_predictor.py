@@ -149,13 +149,16 @@ div[data-testid="stNotification"]{background:#111!important;}
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
 CAMPAIGN_PARAMS = {
-    "social_influencer": {"label":"Social Influencer","base_intent_alpha":3.5,"base_intent_beta":3.0,"engagement_multiplier":1.4,"revenue_per_purchase":(800,5000)},
-    "digital_ar": {"label":"Digital AR Experience","base_intent_alpha":2.8,"base_intent_beta":3.5,"engagement_multiplier":1.6,"revenue_per_purchase":(500,3000)},
-    "product_launch": {"label":"Product Launch","base_intent_alpha":4.0,"base_intent_beta":2.5,"engagement_multiplier":1.2,"revenue_per_purchase":(2000,15000)},
-    "pricing_hike": {"label":"Pricing Strategy","base_intent_alpha":2.0,"base_intent_beta":4.0,"engagement_multiplier":0.8,"revenue_per_purchase":(5000,50000)},
-    "heritage_campaign": {"label":"Heritage Campaign","base_intent_alpha":3.8,"base_intent_beta":2.8,"engagement_multiplier":1.1,"revenue_per_purchase":(3000,20000)},
-    "sustainability": {"label":"Sustainability Initiative","base_intent_alpha":3.2,"base_intent_beta":3.2,"engagement_multiplier":1.3,"revenue_per_purchase":(1000,8000)},
-    "private_client_event": {"label":"Private Client Event","base_intent_alpha":5.0,"base_intent_beta":2.5,"engagement_multiplier":1.1,"revenue_per_purchase":(20000,120000)},
+    "seasonal_collection":   {"label":"Seasonal Collection (SS/FW)","base_intent_alpha":4.5,"base_intent_beta":2.8,"engagement_multiplier":1.3,"city_bias":{"Milano":1.4,"Paris":1.5,"London":1.3,"New York":1.2,"Los Angeles":1.1,"Dubai":1.1,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.2,"Singapore":1.0},"revenue_per_purchase":(1500,8000)},
+    "heritage_savoir_faire": {"label":"Heritage & Savoir-Faire","base_intent_alpha":3.8,"base_intent_beta":2.8,"engagement_multiplier":1.1,"city_bias":{"Milano":1.4,"Paris":1.5,"London":1.3,"New York":1.1,"Los Angeles":1.0,"Dubai":1.1,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.1,"Singapore":1.0},"revenue_per_purchase":(3000,20000)},
+    "celebrity_ambassador":  {"label":"Celebrity & Ambassador","base_intent_alpha":3.5,"base_intent_beta":3.0,"engagement_multiplier":1.5,"city_bias":{"Milano":1.1,"Paris":1.2,"London":1.1,"New York":1.4,"Los Angeles":1.5,"Dubai":1.2,"Riyadh":1.1,"Tokyo":1.3,"Shanghai":1.3,"Singapore":1.1},"revenue_per_purchase":(800,5000)},
+    "immersive_experience":  {"label":"Immersive Experience","base_intent_alpha":4.0,"base_intent_beta":2.5,"engagement_multiplier":1.6,"city_bias":{"Milano":1.3,"Paris":1.4,"London":1.2,"New York":1.3,"Los Angeles":1.2,"Dubai":1.3,"Riyadh":1.0,"Tokyo":1.3,"Shanghai":1.2,"Singapore":1.2},"revenue_per_purchase":(2000,10000)},
+    "digital_social":        {"label":"Digital & Social","base_intent_alpha":2.8,"base_intent_beta":4.0,"engagement_multiplier":1.8,"city_bias":{"Milano":1.1,"Paris":1.1,"London":1.2,"New York":1.4,"Los Angeles":1.5,"Dubai":1.1,"Riyadh":0.9,"Tokyo":1.4,"Shanghai":1.4,"Singapore":1.3},"revenue_per_purchase":(500,3000)},
+    "collaboration_capsule": {"label":"Collaboration & Capsule","base_intent_alpha":4.2,"base_intent_beta":2.6,"engagement_multiplier":1.4,"city_bias":{"Milano":1.2,"Paris":1.3,"London":1.3,"New York":1.4,"Los Angeles":1.4,"Dubai":1.1,"Riyadh":0.9,"Tokyo":1.3,"Shanghai":1.2,"Singapore":1.1},"revenue_per_purchase":(1200,7000)},
+    "sustainability_re_edit": {"label":"Sustainability & Re-Edition","base_intent_alpha":3.0,"base_intent_beta":3.5,"engagement_multiplier":1.2,"city_bias":{"Milano":1.2,"Paris":1.3,"London":1.4,"New York":1.3,"Los Angeles":1.3,"Dubai":0.9,"Riyadh":0.8,"Tokyo":1.1,"Shanghai":1.0,"Singapore":1.1},"revenue_per_purchase":(1000,6000)},
+    "product_launch":        {"label":"Product Launch","base_intent_alpha":4.5,"base_intent_beta":2.5,"engagement_multiplier":1.3,"city_bias":{"Milano":1.3,"Paris":1.4,"London":1.2,"New York":1.3,"Los Angeles":1.2,"Dubai":1.2,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.2,"Singapore":1.0},"revenue_per_purchase":(1200,8000)},
+    "private_client_event":  {"label":"Private Client Event","base_intent_alpha":5.0,"base_intent_beta":2.0,"engagement_multiplier":1.1,"city_bias":{"Milano":1.2,"Paris":1.4,"London":1.3,"New York":1.3,"Los Angeles":1.1,"Dubai":1.5,"Riyadh":1.4,"Tokyo":1.2,"Shanghai":1.2,"Singapore":1.2},"revenue_per_purchase":(5000,50000)},
+    "cultural_activation":   {"label":"Cultural Activation","base_intent_alpha":3.5,"base_intent_beta":3.0,"engagement_multiplier":1.4,"city_bias":{"Milano":1.3,"Paris":1.4,"London":1.3,"New York":1.3,"Los Angeles":1.3,"Dubai":1.1,"Riyadh":0.9,"Tokyo":1.4,"Shanghai":1.3,"Singapore":1.2},"revenue_per_purchase":(1000,6000)},
 }
 
 ALL_CITIES = ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"]
