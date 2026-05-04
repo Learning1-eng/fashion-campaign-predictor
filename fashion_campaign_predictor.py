@@ -132,6 +132,10 @@ button[data-testid="baseButton-secondary"]:hover{background:#C8D400!important;co
 [data-baseweb='multi-select']{background:#fff!important;border:1px solid #555!important;border-radius:4px!important;}[data-baseweb='input']{border-color:#111!important;border-width:1px!important;}[data-baseweb='base-input']{border-color:#111!important;border-width:1px!important;}[data-baseweb='select'] > div{border-color:#111!important;border-width:1px!important;}div[data-testid='stNumberInput'] > div{border:1px solid #111!important;}input{border:1px solid #111!important;}input:focus{box-shadow:none!important;outline:none!important;border-color:#111!important;}textarea{border:1px solid #111!important;}
 button[data-testid="stNumberInput-StepDown"],button[data-testid="stNumberInput-StepUp"]{background:#111!important;color:#fff!important;border:none!important;}
 button[data-testid="stNumberInput-StepDown"]:hover,button[data-testid="stNumberInput-StepUp"]:hover{background:#C8D400!important;color:#111!important;}
+[data-testid="stSlider"] p{color:#111!important;font-weight:600!important;}
+[data-testid="stSlider"] [data-testid="stMarkdownContainer"] p{color:#111!important;}
+div[data-testid="stSlider"] > div > div > div[role="presentation"]{color:#111!important;}
+[data-testid="stSlider"] span{color:#111!important;}
 :root{--primary-color:#111111!important;--secondary-background-color:#F5F5F3!important;}
 button{color:#111!important;}
 .stAlert{display:none;}
@@ -183,7 +187,7 @@ def run_simulation(campaign_type, n_vics, cities, budget, seed=42, brand_city_bi
     agents = []
     for i in range(n_sim):
         city = assigned_cities[i]
-        cf = cp["city_bias"].get(city, 1.0)
+        cf = cp.get("city_bias", {}).get(city, 1.0)
         if brand_city_bias:
             cf = cf * brand_city_bias.get(city, 1.0)
         pi = assigned_personas[i]
@@ -276,18 +280,24 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
 
 with tab1:
     REGION_MAP = {
-        "All markets":    ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"],
-        "Europe":         ["Milano","Paris","London"],
-        "Middle East":    ["Dubai","Riyadh"],
-        "Asia Pacific":   ["Tokyo","Shanghai","Singapore"],
-        "Americas":       ["New York","Los Angeles"],
+        "All markets":       ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Abu Dhabi","Tokyo","Shanghai","Beijing","Hong Kong","Singapore","Seoul","Sydney","Mumbai","São Paulo","Mexico City","Zurich","Geneva","Monaco","Copenhagen","Stockholm"],
+        "Europe":            ["Milano","Paris","London","Zurich","Geneva","Monaco","Copenhagen","Stockholm","Madrid","Amsterdam","Berlin","Vienna","Brussels"],
+        "Middle East":       ["Dubai","Riyadh","Abu Dhabi","Kuwait City","Doha","Beirut"],
+        "Asia Pacific":      ["Tokyo","Shanghai","Beijing","Hong Kong","Singapore","Seoul","Sydney","Taipei","Bangkok","Jakarta"],
+        "Americas":          ["New York","Los Angeles","Miami","São Paulo","Mexico City","Chicago","San Francisco","Toronto","Buenos Aires"],
+        "China":             ["Shanghai","Beijing","Chengdu","Guangzhou","Shenzhen","Hangzhou"],
+        "South Asia":        ["Mumbai","New Delhi","Bangalore"],
+        "Europe Luxury":     ["Milano","Paris","London","Zurich","Monaco","Geneva"],
     }
+    # Filter cities to only those in ALL_CITIES for simulation
+
     ct_col1, ct_col2 = st.columns([1.4,1])
     with ct_col1:
         campaign_type = st.selectbox("Campaign type", options=list(CAMPAIGN_PARAMS.keys()), format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
     with ct_col2:
         region = st.selectbox("Target region", list(REGION_MAP.keys()), key="region_tab1")
-        cities = REGION_MAP[region]
+        # Use all selected cities for display; simulation uses ALL_CITIES subset
+        cities = [c for c in REGION_MAP[region] if c in ALL_CITIES] or ALL_CITIES[:5]
     n_vics = st.slider("VIC Pool Size", min_value=500, max_value=50000, value=5000, step=500, key="n_vics_tab1")
     budget = st.slider("Budget (EUR)", min_value=50000, max_value=5000000, value=500000, step=50000, key="budget_tab1")
     st.markdown("<br>",unsafe_allow_html=True)
@@ -471,7 +481,7 @@ with tab5:
         ms_data = []
         for city in (ms_cities or ALL_CITIES):
             for persona, share, intent, eng in VIC_PERSONAS:
-                cf = CAMPAIGN_PARAMS[ms_campaign]["city_bias"].get(city, 1.0)
+                cf = CAMPAIGN_PARAMS[ms_campaign].get("city_bias", {}).get(city, 1.0)
                 vic_count = round(share * 1000 * cf * rng_ms.uniform(0.85, 1.15))
                 _bp5 = st.session_state.get("brand_profile") or {}
                 _ov5 = (_bp5.get("ego_override") or {}).get(persona, None)
