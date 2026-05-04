@@ -280,24 +280,30 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
 
 with tab1:
     REGION_MAP = {
-        "All markets":       ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Abu Dhabi","Tokyo","Shanghai","Beijing","Hong Kong","Singapore","Seoul","Sydney","Mumbai","São Paulo","Mexico City","Zurich","Geneva","Monaco","Copenhagen","Stockholm"],
-        "Europe":            ["Milano","Paris","London","Zurich","Geneva","Monaco","Copenhagen","Stockholm","Madrid","Amsterdam","Berlin","Vienna","Brussels"],
-        "Middle East":       ["Dubai","Riyadh","Abu Dhabi","Kuwait City","Doha","Beirut"],
-        "Asia Pacific":      ["Tokyo","Shanghai","Beijing","Hong Kong","Singapore","Seoul","Sydney","Taipei","Bangkok","Jakarta"],
-        "Americas":          ["New York","Los Angeles","Miami","São Paulo","Mexico City","Chicago","San Francisco","Toronto","Buenos Aires"],
-        "China":             ["Shanghai","Beijing","Chengdu","Guangzhou","Shenzhen","Hangzhou"],
-        "South Asia":        ["Mumbai","New Delhi","Bangalore"],
-        "Europe Luxury":     ["Milano","Paris","London","Zurich","Monaco","Geneva"],
+        "All markets":     ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"],
+        "Europe":          ["Milano","Paris","London","Zurich","Geneva","Monaco","Madrid","Amsterdam","Copenhagen","Stockholm"],
+        "Middle East":     ["Dubai","Riyadh","Abu Dhabi","Doha","Kuwait City"],
+        "Asia Pacific":    ["Tokyo","Shanghai","Beijing","Hong Kong","Singapore","Seoul","Sydney"],
+        "South East Asia": ["Singapore","Bangkok","Kuala Lumpur","Jakarta","Manila"],
+        "Americas":        ["New York","Los Angeles","Miami","São Paulo","Mexico City","Chicago","San Francisco"],
+        "China":           ["Shanghai","Beijing","Chengdu","Guangzhou","Shenzhen"],
+        "Africa & Levant": ["Dubai","Cairo","Casablanca","Johannesburg","Beirut"],
     }
+    CITY_POOL = ["Milano","Paris","London","New York","Los Angeles","Dubai","Riyadh","Tokyo","Shanghai","Singapore"]
     # Filter cities to only those in ALL_CITIES for simulation
 
-    ct_col1, ct_col2 = st.columns([1.4,1])
+    ct_col1, ct_col2, ct_col3 = st.columns([1.4,1,1])
     with ct_col1:
         campaign_type = st.selectbox("Campaign type", options=list(CAMPAIGN_PARAMS.keys()), format_func=lambda x:CAMPAIGN_PARAMS[x]["label"])
     with ct_col2:
-        region = st.selectbox("Target region", list(REGION_MAP.keys()), key="region_tab1")
-        # Use all selected cities for display; simulation uses ALL_CITIES subset
-        cities = [c for c in REGION_MAP[region] if c in ALL_CITIES] or ALL_CITIES[:5]
+        region = st.selectbox("Region", list(REGION_MAP.keys()), key="region_tab1")
+        region_cities = REGION_MAP[region]
+    with ct_col3:
+        # Filter to simulation-ready cities
+        sim_cities = [c for c in region_cities if c in CITY_POOL] or CITY_POOL[:3]
+        city_options = ["All in region"] + sim_cities
+        city_choice = st.selectbox("Major city", city_options, key="city_tab1")
+        cities = sim_cities if city_choice == "All in region" else [city_choice] if city_choice in CITY_POOL else sim_cities
     n_vics = st.slider("VIC Pool Size", min_value=500, max_value=50000, value=5000, step=500, key="n_vics_tab1")
     budget = st.slider("Budget (EUR)", min_value=50000, max_value=5000000, value=500000, step=50000, key="budget_tab1")
     st.markdown("<br>",unsafe_allow_html=True)
