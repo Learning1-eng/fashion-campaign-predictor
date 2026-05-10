@@ -222,12 +222,6 @@ with st.sidebar:
     except:
         st.markdown('<div style="text-align:center;font-size:1.2rem;font-weight:900;color:#C8D400;padding:.8rem 0;">DFG</div>', unsafe_allow_html=True)
     st.markdown('<hr style="border-color:#333;margin:.3rem 0 .8rem;">', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:.3rem;">Client brand logo</div>', unsafe_allow_html=True)
-    uploaded_logo = st.file_uploader("logo", type=["png","jpg","jpeg"], label_visibility="collapsed")
-    if uploaded_logo:
-        logo_data = base64.b64encode(uploaded_logo.read()).decode()
-        st.markdown(f'<div style="text-align:center;padding:.3rem 0 .6rem;"><img src="data:image/png;base64,{logo_data}" style="max-width:120px;max-height:50px;object-fit:contain;"></div>', unsafe_allow_html=True)
-    st.markdown('<hr style="border-color:#333;margin:.5rem 0 .8rem;">', unsafe_allow_html=True)
     st.markdown('<div style="font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:.4rem;">Type a brand</div>', unsafe_allow_html=True)
     BRAND_PROFILES = {
         "Gucci":           {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.55,"Adult":0.25,"Child":0.20},"Aspirational Buyer":{"Parent":0.15,"Adult":0.25,"Child":0.60},"Heritage Loyalist":{"Parent":0.60,"Adult":0.30,"Child":0.10}}, "rd_default": "Established", "color": "#C8D400", "note": "Post-reset — anti-vanilla, clivant (De Meo Axiome XI)"},
