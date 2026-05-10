@@ -264,7 +264,7 @@ if "n_vics" not in st.session_state: st.session_state["n_vics"] = 5000
 if "cities" not in st.session_state: st.session_state["cities"] = ALL_CITIES[:5]
 if "budget" not in st.session_state: st.session_state["budget"] = 500000
 
-tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8,tab9 = st.tabs([
+tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8,tab9,tab10 = st.tabs([
     "Campaign Simulator",
     "Creative Testing",
     "Product Launch",
@@ -274,6 +274,7 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8,tab9 = st.tabs([
     "Brand Perception",
     "VIC Psychographic Engine",
     "VIC Focus Group",
+    "Claims Test",
 ])
 
 with tab1:
@@ -1261,18 +1262,34 @@ Length: 3-5 sentences. Senior luxury consumer voice — never generic."""
             with st.spinner("Generating VIC response..."):
                 try:
                     import requests as _req
+                    # Get API key
+                    try:
+                        _api_key = st.secrets["ANTHROPIC_API_KEY"]
+                    except Exception as _ke:
+                        st.error(f"Secret not found: {_ke}. Add ANTHROPIC_API_KEY to Streamlit secrets.")
+                        st.stop()
+
                     _resp = _req.post(
                         "https://api.anthropic.com/v1/messages",
-                        headers={"Content-Type": "application/json"},
+                        headers={
+                            "Content-Type": "application/json",
+                            "x-api-key": _api_key,
+                            "anthropic-version": "2023-06-01"
+                        },
                         json={
-                            "model": "claude-sonnet-4-20250514",
+                            "model": "claude-sonnet-4-5",
                             "max_tokens": 1000,
                             "system": system_prompt,
                             "messages": [{"role": "user", "content": fg_question}]
-                        }
+                        },
+                        timeout=30
                     )
                     _data = _resp.json()
-                    _answer = _data["content"][0]["text"] if _data.get("content") else "No response generated."
+                    if _data.get("content"):
+                        _answer = _data["content"][0]["text"]
+                    else:
+                        _err = _data.get("error", {})
+                        _answer = f"API error {_resp.status_code}: {_err.get('message', str(_data))}"
 
                     st.markdown(
                         f"<div style='background:#F5F5F3;border-left:3px solid #C8D400;padding:1.2rem 1.4rem;margin-top:1rem;border-radius:2px;'>"
@@ -1292,9 +1309,9 @@ Length: 3-5 sentences. Senior luxury consumer voice — never generic."""
                     ]:
                         with col:
                             st.markdown(
-                                f"<div class='metric-card'>"
-                                f"<div class='metric-value' style='color:{color};font-size:1.4rem;'>{val:.0%}</div>"
-                                f"<div class='metric-label'>{state} ego state</div>"
+                                f"<div style='background:#fff;border:1px solid #E8E8E4;padding:.8rem 1rem;text-align:center;'>"
+                                f"<div style='font-family:Montserrat,sans-serif;font-size:1.6rem;font-weight:700;color:{color};line-height:1;'>{val:.0%}</div>"
+                                f"<div style='font-family:Montserrat,sans-serif;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:.4rem;'>{state} ego state</div>"
                                 f"</div>",
                                 unsafe_allow_html=True
                             )
@@ -1307,5 +1324,152 @@ Length: 3-5 sentences. Senior luxury consumer voice — never generic."""
                     )
 
                 except Exception as _e:
+                    import traceback
                     st.error(f"API error: {str(_e)}")
+                    st.code(traceback.format_exc())
+
+with tab10:
+    _ct_brand = st.session_state.get("_last_brand", "")
+    _ct_bp = st.session_state.get("brand_profile") or {}
+    _ct_note = _ct_bp.get("note", "")
+
+    st.markdown("<div class='section-label'>Claims Test — Synthetic VIC Panel</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#555;font-size:.85rem;margin-bottom:1.2rem;'>"
+        "Test up to 3 campaign headlines or concepts against a synthetic VIC panel. "
+        "Each claim is scored by purchase intent, emotional resonance, and ego state alignment "
+        "across the full VIC archetype distribution."
+        "</p>", unsafe_allow_html=True
+    )
+
+    ct_col1, ct_col2 = st.columns(2)
+    with ct_col1:
+        ct_campaign = st.selectbox("Campaign context", options=list(CAMPAIGN_PARAMS.keys()),
+            format_func=lambda x: CAMPAIGN_PARAMS[x]["label"], key="ct_campaign")
+    with ct_col2:
+        ct_rd = st.selectbox("Relationship Depth", ["New","Established","Legacy"], index=1, key="ct_rd")
+
+    ct_lang = st.selectbox("Response language", ["English","Italian","French","Arabic","Japanese"], key="ct_lang")
+
+    st.markdown("<div style='margin:.8rem 0 .4rem;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#666;'>Claims / Headlines</div>", unsafe_allow_html=True)
+    claim1 = st.text_input("Claim 1", placeholder="e.g. Crafted for those who need no introduction", key="claim1")
+    claim2 = st.text_input("Claim 2", placeholder="e.g. The collection that defies the obvious", key="claim2")
+    claim3 = st.text_input("Claim 3", placeholder="e.g. Bold. Unapologetic. Yours.", key="claim3")
+    claims = [c for c in [claim1, claim2, claim3] if c.strip()]
+
+    if st.button("Run Claims Test", key="ct_run"):
+        if not claims:
+            st.warning("Enter at least one claim.")
+        else:
+            import numpy as np, pandas as pd, requests as _req, json, re
+
+            EGO_CT = {
+                "Ultra-HNWI Collector":    {"Parent":0.65,"Adult":0.25,"Child":0.10},
+                "Brand Ambassador":        {"Parent":0.30,"Adult":0.35,"Child":0.35},
+                "Aspirational Buyer":      {"Parent":0.20,"Adult":0.30,"Child":0.50},
+                "Trend Setter Influencer": {"Parent":0.10,"Adult":0.30,"Child":0.60},
+                "Private Client":          {"Parent":0.40,"Adult":0.55,"Child":0.05},
+                "Digital Native":          {"Parent":0.10,"Adult":0.45,"Child":0.45},
+                "Heritage Loyalist":       {"Parent":0.70,"Adult":0.25,"Child":0.05},
+                "Gulf HNWI":               {"Parent":0.55,"Adult":0.30,"Child":0.15},
+                "Asia Pacific VIC":        {"Parent":0.45,"Adult":0.40,"Child":0.15},
+            }
+            RD_MULT = {"New":0.85,"Established":1.0,"Legacy":1.15}
+            rd_mult = RD_MULT.get(ct_rd, 1.0)
+            _brand_ov = _ct_bp.get("ego_override") or {}
+            results = []
+
+            with st.spinner("Scoring claims against VIC panel..."):
+                for claim in claims:
+                    for persona, share, base_intent, base_eng in VIC_PERSONAS:
+                        ep = EGO_CT.get(persona, {"Parent":0.33,"Adult":0.34,"Child":0.33})
+                        if persona in _brand_ov:
+                            ep = {**ep, **_brand_ov[persona]}
+                        dominant = max(["Parent","Adult","Child"], key=lambda k: ep.get(k,0))
+                        score_prompt = (
+                            f"You are evaluating a luxury campaign claim for a specific consumer archetype.\n"
+                            f"Brand: {_ct_brand if _ct_brand else 'Premium luxury brand'}\n"
+                            f"Claim: \"{claim}\"\n"
+                            f"Archetype: {persona} | Dominant ego state: {dominant} ({ep.get(dominant,0.33):.0%})\n"
+                            f"Relationship depth: {ct_rd} | Campaign: {CAMPAIGN_PARAMS[ct_campaign]['label']}\n\n"
+                            f"Score 0-100 each. Respond ONLY with JSON:\n"
+                            f'{{"purchase_intent":<0-100>,"emotional_resonance":<0-100>,"ego_alignment":<0-100>,"reaction":"<8 words in {ct_lang}>"}}'
+                        )
+                        try:
+                            _api_key_ct = st.secrets.get("ANTHROPIC_API_KEY", "")
+                            _resp = _req.post(
+                                "https://api.anthropic.com/v1/messages",
+                                headers={"Content-Type":"application/json","x-api-key":_api_key_ct,"anthropic-version":"2023-06-01"},
+                                json={"model":"claude-sonnet-4-20250514","max_tokens":150,
+                                      "messages":[{"role":"user","content":score_prompt}]}
+                            )
+                            _text = _resp.json().get("content",[{}])[0].get("text","{}")
+                            _m = re.search(r'\{.*\}', _text, re.DOTALL)
+                            _s = json.loads(_m.group()) if _m else {}
+                        except:
+                            _s = {}
+                        pi_score = _s.get("purchase_intent",50)
+                        er_score = _s.get("emotional_resonance",50)
+                        ea_score = _s.get("ego_alignment",50)
+                        results.append({
+                            "Claim": claim[:35]+"..." if len(claim)>35 else claim,
+                            "Persona": persona,
+                            "Purchase Intent": round(pi_score,0),
+                            "Emotional Resonance": round(er_score,0),
+                            "Ego Alignment": round(ea_score,0),
+                            "Reaction": _s.get("reaction","—"),
+                            "Weighted": round((pi_score+er_score+ea_score)/3*share*rd_mult,2),
+                        })
+
+            df_ct = pd.DataFrame(results)
+            summary = df_ct.groupby("Claim").agg(
+                Intent=("Purchase Intent","mean"),
+                Resonance=("Emotional Resonance","mean"),
+                Ego=("Ego Alignment","mean"),
+                Score=("Weighted","sum"),
+            ).reset_index().sort_values("Score",ascending=False).reset_index(drop=True)
+
+            st.markdown("<br><div class='section-label'>Claim ranking</div>", unsafe_allow_html=True)
+            medals = ["🥇","🥈","🥉"]
+            for idx, row in summary.iterrows():
+                border = "3px solid #C8D400" if idx==0 else "1px solid #E8E8E4"
+                medal = medals[idx] if idx < 3 else ""
+                st.markdown(
+                    f"<div style='border:{border};padding:1rem 1.2rem;margin-bottom:.6rem;'>"
+                    f"<div style='font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:#999;'>{medal} Claim</div>"
+                    f"<div style='font-size:.95rem;font-weight:600;color:#111;margin:.3rem 0 .6rem;'>&ldquo;{row['Claim']}&rdquo;</div>"
+                    f"<div style='display:flex;gap:2rem;font-size:.75rem;color:#555;'>"
+                    f"<span>Intent <strong style='color:#111'>{row['Intent']:.0f}</strong></span>"
+                    f"<span>Resonance <strong style='color:#111'>{row['Resonance']:.0f}</strong></span>"
+                    f"<span>Ego Alignment <strong style='color:#111'>{row['Ego']:.0f}</strong></span>"
+                    f"<span>Score <strong style='color:#C8D400'>{row['Score']:.1f}</strong></span>"
+                    f"</div></div>", unsafe_allow_html=True
+                )
+
+            st.markdown("<br><div class='section-label'>Persona breakdown</div>", unsafe_allow_html=True)
+            st.dataframe(
+                df_ct[["Persona","Claim","Purchase Intent","Emotional Resonance","Ego Alignment","Reaction"]],
+                use_container_width=True, hide_index=True
+            )
+
+            st.markdown(
+                "<div style='font-size:.65rem;color:#bbb;margin-top:.8rem;'>"
+                "⚠️ Synthetic scoring — directional proxy only. Validate against real consumer data before go-to-market decisions.</div>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                "<div style='margin-top:1.5rem;padding:1.2rem 1.4rem;background:#F5F5F3;font-size:.55rem;color:#888;line-height:2;'>"
+                "<strong style='color:#111;text-transform:uppercase;font-size:.5rem;letter-spacing:.1em;'>Methodology — Claims Test</strong><br><br>"
+                "<strong style='color:#111;'>Scoring Framework.</strong> "
+                "Each claim is evaluated across three psychometric dimensions — Purchase Intent, Emotional Resonance, and Ego State Alignment — "
+                "for each VIC archetype. Scores are generated by a language model conditioned on the archetype ego state profile, "
+                "dominant driver (Stewart &amp; Joines, 2012), Relationship Depth tier, and campaign context. "
+                "Weighted scores aggregate archetype responses proportional to population share, adjusted by Relationship Depth multiplier. "
+                "Legacy relationships amplify scores by 15%; New relationships apply a 15% discount — reflecting the TA principle that "
+                "ego state rigidity increases with relationship depth (Berne, 1972).<br><br>"
+                "<strong style='color:#111;'>Validation Principle.</strong> "
+                "Claims Test outputs are hypotheses, not predictions. They prioritize and rank concepts before primary research investment. "
+                "Synthetic ranking should be confirmed against real consumer panels or A/B testing before go-to-market deployment."
+                "</div>", unsafe_allow_html=True
+            )
 
