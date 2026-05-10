@@ -149,7 +149,7 @@ div[data-testid="stNotification"]{background:#111!important;}
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
 CAMPAIGN_PARAMS = {
-    "seasonal_collection":   {"label":"Seasonal Collection (SS/FW)","base_intent_alpha":4.5,"base_intent_beta":2.8,"engagement_multiplier":1.3,"city_bias":{"Milano":1.4,"Paris":1.5,"London":1.3,"New York":1.2,"Los Angeles":1.1,"Dubai":1.1,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.2,"Singapore":1.0},"revenue_per_purchase":(1500,8000)},
+    "seasonal_collection":   {"label":"Seasonal Collection","base_intent_alpha":4.5,"base_intent_beta":2.8,"engagement_multiplier":1.3,"city_bias":{"Milano":1.4,"Paris":1.5,"London":1.3,"New York":1.2,"Los Angeles":1.1,"Dubai":1.1,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.2,"Singapore":1.0},"revenue_per_purchase":(1500,8000)},
     "heritage_savoir_faire": {"label":"Heritage & Savoir-Faire","base_intent_alpha":3.8,"base_intent_beta":2.8,"engagement_multiplier":1.1,"city_bias":{"Milano":1.4,"Paris":1.5,"London":1.3,"New York":1.1,"Los Angeles":1.0,"Dubai":1.1,"Riyadh":1.0,"Tokyo":1.2,"Shanghai":1.1,"Singapore":1.0},"revenue_per_purchase":(3000,20000)},
     "celebrity_ambassador":  {"label":"Celebrity & Ambassador","base_intent_alpha":3.5,"base_intent_beta":3.0,"engagement_multiplier":1.5,"city_bias":{"Milano":1.1,"Paris":1.2,"London":1.1,"New York":1.4,"Los Angeles":1.5,"Dubai":1.2,"Riyadh":1.1,"Tokyo":1.3,"Shanghai":1.3,"Singapore":1.1},"revenue_per_purchase":(800,5000)},
     "immersive_experience":  {"label":"Immersive Experience","base_intent_alpha":4.0,"base_intent_beta":2.5,"engagement_multiplier":1.6,"city_bias":{"Milano":1.3,"Paris":1.4,"London":1.2,"New York":1.3,"Los Angeles":1.2,"Dubai":1.3,"Riyadh":1.0,"Tokyo":1.3,"Shanghai":1.2,"Singapore":1.2},"revenue_per_purchase":(2000,10000)},
@@ -224,7 +224,7 @@ with st.sidebar:
     st.markdown('<hr style="border-color:#333;margin:.3rem 0 .8rem;">', unsafe_allow_html=True)
     st.markdown('<div style="font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:.4rem;">Type a brand</div>', unsafe_allow_html=True)
     BRAND_PROFILES = {
-        "Gucci":           {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.55,"Adult":0.25,"Child":0.20},"Aspirational Buyer":{"Parent":0.15,"Adult":0.25,"Child":0.60},"Heritage Loyalist":{"Parent":0.60,"Adult":0.30,"Child":0.10}}, "rd_default": "Established", "color": "#C8D400", "note": "Post-reset — anti-vanilla, clivant (De Meo Axiome XI)"},
+        "Gucci":           {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.55,"Adult":0.25,"Child":0.20},"Aspirational Buyer":{"Parent":0.15,"Adult":0.25,"Child":0.60},"Heritage Loyalist":{"Parent":0.60,"Adult":0.30,"Child":0.10}}, "rd_default": "Established", "color": "#C8D400", "note": "Dual positioning — heritage codes and cultural edge"},
         "Bottega Veneta":  {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.75,"Adult":0.20,"Child":0.05},"Private Client":{"Parent":0.30,"Adult":0.65,"Child":0.05},"Heritage Loyalist":{"Parent":0.80,"Adult":0.15,"Child":0.05}}, "rd_default": "Legacy", "color": "#111", "note": "Parent-dominant — Legacy depth, stealth anti-logo positioning"},
         "Dior":            {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.65,"Adult":0.25,"Child":0.10},"Heritage Loyalist":{"Parent":0.70,"Adult":0.22,"Child":0.08},"Private Client":{"Parent":0.35,"Adult":0.55,"Child":0.10}}, "rd_default": "Legacy", "color": "#888", "note": "Heritage-dominant — savoir-faire, Parisian codes, Legacy default"},
         "Louis Vuitton":   {"ego_override": {"Ultra-HNWI Collector":{"Parent":0.60,"Adult":0.25,"Child":0.15},"Aspirational Buyer":{"Parent":0.20,"Adult":0.20,"Child":0.60},"Digital Native HNWI":{"Parent":0.15,"Adult":0.40,"Child":0.45}}, "rd_default": "Established", "color": "#C8D400", "note": "Dual portfolio — Parent for VICs, Child for aspirational and digital"},
@@ -1109,10 +1109,8 @@ with tab8:
         "letter-spacing:.1em;'>Methodology — TACLA Architecture v3</strong><br><br>"
 
         "<strong style='color:#111;'>Theoretical Foundation.</strong> "
-        "This engine implements the TACLA (Transactional Analysis Contextual LLM-based Agents) "
-        "architecture as formalized by Zamojska &amp; Chudziak (2025, arXiv:2510.17913) and the "
-        "antecedent Trans-ACT framework (arXiv:2507.21354), grounded in Transactional Analysis "
-        "theory (Berne, 1958, 1961, 1964; Stewart &amp; Joines, 2012). "
+        "This engine implements a proprietary Transactional Analysis-based simulation framework "
+        "grounded in ego state theory (Berne, 1958, 1961, 1964; Stewart &amp; Joines, 2012). "
         "Each VIC agent is modeled as a dynamic system of three ego states — "
         "<strong style='color:#111;'>Parent</strong> (internalized values, authority-derived norms), "
         "<strong style='color:#111;'>Adult</strong> (rational processing, present-moment analysis), "
@@ -1165,7 +1163,7 @@ with tab8:
         "The VIC Psychographic Engine targets a directional correlation of 78–85% with live consumer panel benchmarks "
         "on purchase intent ranking across VIC archetypes. This range is grounded in the empirically validated predictive "
         "accuracy of Transactional Analysis ego state models applied to purchase behavior (Berne, 1972; Stewart &amp; Joines, 2012), "
-        "and in the agent-based simulation methodology established by Zamojska &amp; Chudziak (2025) for LLM-based behavioral agents. "
+        "and in established agent-based simulation methodology for LLM-based behavioral agents. "
         "Validation follows a parallel design principle: synthetic outputs are treated as hypotheses and ranked against "
         "real-world campaign performance data where available. "
         "<em>Note: claimed correlation is methodology-based. Empirical validation against live panel data is ongoing.</em><br><br>"
@@ -1175,8 +1173,7 @@ with tab8:
         "Berne, E. (1964). <em>Games People Play.</em> Grove Press. — "
         "Berne, E. (1972). <em>What Do You Say After You Say Hello?</em> Grove Press. — "
         "Stewart, I. &amp; Joines, V. (2012). <em>TA Today.</em> Lifespace Publishing. — "
-        "Zamojska &amp; Chudziak (2025). Trans-ACT. arXiv:2507.21354. — "
-        "Zamojska &amp; Chudziak (2025). TACLA. arXiv:2510.17913."
+        "Dress for Good AI Studio (2025). VIC Psychographic Engine — Proprietary methodology."
         "</div>", unsafe_allow_html=True
     )
 
