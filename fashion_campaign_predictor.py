@@ -369,7 +369,7 @@ with tab2:
     rng2 = np.random.default_rng(99)
     concepts = st.text_area("Enter creative concepts (one per line)", "Heritage storytelling\nProduct close-up\nLifestyle aspiration\nCelebrity endorsement", height=100)
     panel_size = st.number_input("VIC panel size", 200, 5000, 1000, 100, key="ct_panel")
-    if st.button("Test Concepts", key="ct_run"):
+    if st.button("Test Concepts", key="ct_run_tab2"):
         concept_list = [c.strip() for c in concepts.split("\n") if c.strip()]
         results = []
         for concept in concept_list:
