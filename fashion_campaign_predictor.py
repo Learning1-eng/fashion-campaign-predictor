@@ -1155,6 +1155,17 @@ with tab8:
         "At Legacy depth, crossed transactions carry elevated churn risk; "
         "at New depth, they represent a missed acquisition signal rather than a retention risk.<br><br>"
 
+        "<strong style='color:#111;'>VIC Focus Group — Synthetic Qualitative Extension.</strong> "
+        "The Focus Group module extends the quantitative TACLA simulation into the qualitative domain. "
+        "Each synthetic VIC response is generated in-persona by a language model conditioned on ego state weights, "
+        "life script, Relationship Depth, and campaign trigger context. "
+        "Responses are directional proxies for consumer sentiment — not substitutes for primary research. "
+        "This approach aligns with the emerging field of synthetic consumer panels, where AI-generated personas "
+        "are used to simulate purchase intent, claims testing, and messaging response at scale — "
+        "validated against live panel benchmarks. "
+        "Validation methodology follows parallel design principles: synthetic outputs are treated as hypotheses "
+        "to be confirmed against real CRM or panel data.<br><br>"
+
         "<strong style='color:#111;'>References.</strong> "
         "Berne, E. (1961). <em>Transactional Analysis in Psychotherapy.</em> Grove Press. — "
         "Berne, E. (1964). <em>Games People Play.</em> Grove Press. — "
