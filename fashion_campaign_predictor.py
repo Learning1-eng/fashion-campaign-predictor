@@ -270,7 +270,7 @@ if "n_vics" not in st.session_state: st.session_state["n_vics"] = 5000
 if "cities" not in st.session_state: st.session_state["cities"] = ALL_CITIES[:5]
 if "budget" not in st.session_state: st.session_state["budget"] = 500000
 
-tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
+tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8,tab9 = st.tabs([
     "Campaign Simulator",
     "Creative Testing",
     "Product Launch",
@@ -279,6 +279,7 @@ tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
     "Churn Prediction",
     "Brand Perception",
     "VIC Psychographic Engine",
+    "VIC Focus Group",
 ])
 
 with tab1:
@@ -321,8 +322,8 @@ with tab1:
         kpis = [
             (f'{summary["buy_rate"]}%',"Buy rate","Beta-dist. intent model"),
             (f'{summary["buyers"]:,}',"Buyers","VICs with intent > threshold"),
-            (f'EUR {summary["total_revenue"]/1000000:.1f}M',"Revenue","Avg ticket x buyers"),
-            (f'{summary["roi"]:+.0f}%',"ROI","(Revenue - Budget) / Budget"),
+            (f'EUR {summary["total_revenue"]/1000000:.1f}M',"Sim. Revenue","Synthetic proxy — not a forecast"),
+            (f'{summary["roi"]:+.0f}%',"Sim. ROI Index","Comparative index only — not a financial projection"),
             (f'{summary["total_reach"]//1000000:.1f}M',"Reach","Sum influence scores"),
         ]
         for col,(val,label,note) in zip([c1,c2,c3,c4,c5],kpis):
@@ -365,6 +366,7 @@ with tab1:
                    f"projects a {roi_read} ROI of {summary['roi']:+.0f}% on a EUR{budget:,.0f} investment. "
                    f"Conversion: {summary['buy_rate']}%. Top market: {top_city}. Dominant persona: {top_persona}.")
         st.markdown(f"<div style='font-family:Montserrat;font-size:.88rem;font-weight:300;color:#111;line-height:1.9;padding:1rem 0 1rem 1.2rem;border-left:3px solid #C8D400;'>{readout}</div>",unsafe_allow_html=True)
+        st.markdown("<div style='font-family:Montserrat;font-size:.72rem;color:#999;margin-top:.8rem;padding:.6rem 1rem;border:1px solid #E8E8E4;'>⚠️ <strong>Simulation disclaimer</strong> — Revenue and ROI Index are synthetic outputs based on VIC agent modeling. They are comparative indices for scenario planning, not financial forecasts. Actual results depend on real CRM data, media mix, and market conditions.</div>", unsafe_allow_html=True)
 
 with tab2:
     st.markdown("<div class='section-label'>Creative Testing</div>",unsafe_allow_html=True)
@@ -1162,4 +1164,143 @@ with tab8:
         "Zamojska &amp; Chudziak (2025). TACLA. arXiv:2510.17913."
         "</div>", unsafe_allow_html=True
     )
+
+with tab9:
+    _fg_brand = st.session_state.get("_last_brand", "")
+    _fg_bp = st.session_state.get("brand_profile") or {}
+    _fg_brand_note = _fg_bp.get("note", "")
+
+    st.markdown("<div class='section-label'>VIC Focus Group — Synthetic Qualitative Research</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#555;font-size:.85rem;margin-bottom:1.2rem;'>"
+        "Simulate a qualitative interview with a synthetic VIC agent. "
+        "Each response is generated in-persona using the TACLA ego state framework "
+        "and the brand context loaded from the sidebar."
+        "</p>",
+        unsafe_allow_html=True
+    )
+
+    fg_col1, fg_col2 = st.columns(2)
+    with fg_col1:
+        fg_persona = st.selectbox(
+            "VIC Archetype",
+            [p[0] for p in VIC_PERSONAS],
+            key="fg_persona"
+        )
+        fg_trigger = st.selectbox(
+            "Campaign trigger",
+            list(TRIGGER_TX_MAP.keys()),
+            key="fg_trigger"
+        )
+    with fg_col2:
+        fg_rd = st.selectbox(
+            "Relationship Depth",
+            ["New","Established","Legacy"],
+            index=1,
+            key="fg_rd"
+        )
+        fg_language = st.selectbox(
+            "Response language",
+            ["English","Italian","French","Arabic","Japanese","Mandarin"],
+            key="fg_language"
+        )
+
+    fg_question = st.text_area(
+        "Your question to the VIC",
+        placeholder="e.g. What do you think about the new Gucci collection? Would you consider purchasing?",
+        height=80,
+        key="fg_question"
+    )
+
+    if st.button("Run Focus Group", key="fg_run"):
+        if not fg_question.strip():
+            st.warning("Please enter a question.")
+        else:
+            _ego_profiles = {
+                "Ultra-HNWI Collector": {"Parent":0.65,"Adult":0.25,"Child":0.10,"life_script":"I deserve the best — status is everything"},
+                "Brand Ambassador":     {"Parent":0.30,"Adult":0.35,"Child":0.35,"life_script":"I define trends before they exist"},
+                "Aspirational Buyer":   {"Parent":0.20,"Adult":0.30,"Child":0.50,"life_script":"I want to belong to a world I admire"},
+                "Trend Setter Influencer": {"Parent":0.10,"Adult":0.30,"Child":0.60,"life_script":"I live for the new and the now"},
+                "Private Client":       {"Parent":0.40,"Adult":0.55,"Child":0.05,"life_script":"I value discretion and craftsmanship above all"},
+                "Digital Native":       {"Parent":0.10,"Adult":0.45,"Child":0.45,"life_script":"I research everything before I commit"},
+                "Heritage Loyalist":    {"Parent":0.70,"Adult":0.25,"Child":0.05,"life_script":"I buy legacy, not fashion"},
+                "Gulf HNWI":            {"Parent":0.55,"Adult":0.30,"Child":0.15,"life_script":"Luxury is my cultural language"},
+                "Asia Pacific VIC":     {"Parent":0.45,"Adult":0.40,"Child":0.15,"life_script":"I invest in brands that signal global sophistication"},
+            }
+            _p = _ego_profiles.get(fg_persona, _ego_profiles["Private Client"])
+            _rd_desc = RD_PROFILES.get(fg_rd, {}).get("description", "")
+            _dominant = max(_p, key=lambda k: _p[k] if k in ["Parent","Adult","Child"] else 0)
+            _dominant_map = {
+                "Parent": "values, status, tradition — responds to heritage, authority, exclusivity signals",
+                "Adult":  "rational, analytical — responds to value proposition, quality proof, transparent information",
+                "Child":  "emotional, impulsive — responds to desire, FOMO, aesthetic excitement, social validation"
+            }
+            _brand_context = f"Brand: {_fg_brand}. {_fg_brand_note}" if _fg_brand else "Generic luxury brand"
+            _trigger_desc = TRIGGER_TX_MAP.get(fg_trigger, {}).get("description", fg_trigger)
+
+            system_prompt = f"""You are a synthetic VIC (Very Important Client) participating in a luxury brand focus group.
+
+You are: {fg_persona}
+Your life script: {_p.get('life_script','')}
+Your dominant ego state: {_dominant} — {_dominant_map.get(_dominant,'')}
+Ego state weights — Parent: {_p['Parent']:.0%}, Adult: {_p['Adult']:.0%}, Child: {_p['Child']:.0%}
+Your relationship with the brand: {fg_rd} — {_rd_desc}
+Campaign trigger context: {fg_trigger} — {_trigger_desc}
+{_brand_context}
+
+Respond in first person as this VIC archetype. Stay in character throughout.
+Respond in {fg_language}.
+Be specific, authentic, and nuanced. Reference your ego state naturally — do not explain the framework.
+Length: 3-5 sentences. Senior luxury consumer voice — never generic."""
+
+            with st.spinner("Generating VIC response..."):
+                try:
+                    import requests as _req
+                    _resp = _req.post(
+                        "https://api.anthropic.com/v1/messages",
+                        headers={"Content-Type": "application/json"},
+                        json={
+                            "model": "claude-sonnet-4-20250514",
+                            "max_tokens": 1000,
+                            "system": system_prompt,
+                            "messages": [{"role": "user", "content": fg_question}]
+                        }
+                    )
+                    _data = _resp.json()
+                    _answer = _data["content"][0]["text"] if _data.get("content") else "No response generated."
+
+                    st.markdown(
+                        f"<div style='background:#F5F5F3;border-left:3px solid #C8D400;padding:1.2rem 1.4rem;margin-top:1rem;border-radius:2px;'>"
+                        f"<div style='font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.6rem;'>"
+                        f"{fg_persona} · {fg_rd} · {fg_trigger} · {fg_language}</div>"
+                        f"<div style='font-size:.92rem;font-family:Montserrat,sans-serif;color:#111;line-height:1.8;'>{_answer}</div>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+
+                    # Show ego state breakdown
+                    eg_col1, eg_col2, eg_col3 = st.columns(3)
+                    for col, state, val, color in [
+                        (eg_col1, "Parent", _p["Parent"], "#111"),
+                        (eg_col2, "Adult",  _p["Adult"],  "#555"),
+                        (eg_col3, "Child",  _p["Child"],  "#C8D400"),
+                    ]:
+                        with col:
+                            st.markdown(
+                                f"<div class='metric-card'>"
+                                f"<div class='metric-value' style='color:{color};font-size:1.4rem;'>{val:.0%}</div>"
+                                f"<div class='metric-label'>{state} ego state</div>"
+                                f"</div>",
+                                unsafe_allow_html=True
+                            )
+
+                    st.markdown(
+                        "<div style='font-size:.65rem;color:#bbb;margin-top:.8rem;'>"
+                        "⚠️ Synthetic VIC response — generated by TACLA psychographic engine. "
+                        "Not a real consumer. For directional insight only.</div>",
+                        unsafe_allow_html=True
+                    )
+
+                except Exception as _e:
+                    st.error(f"API error: {str(_e)}")
 
